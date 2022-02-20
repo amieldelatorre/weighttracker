@@ -2,6 +2,8 @@
 using WeightTracker.Data;
 using WeightTracker.Models;
 using WeightTracker.Dtos;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace WeightTracker.Controllers
 {
@@ -17,10 +19,15 @@ namespace WeightTracker.Controllers
             _repository = repository;
         }
 
+        [Authorize]
         [HttpGet("api/[controller]")]
         public IEnumerable<WeightDTO> GetWeights()
         {
-            IEnumerable<WeightProgress> weights = _repository.GetAllWeights();
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            string username = claimsIdentity.FindFirst(ClaimTypes.Name).Value;
+            User user = _repository.GetUserByUsername(username);
+
+            IEnumerable<WeightProgress> weights = _repository.GetWeightProgressByUserId(user.Id);
             IEnumerable<WeightDTO> weightsOut = weights.Select(weight => new WeightDTO
             {
                 Id = weight.Id,
@@ -32,11 +39,16 @@ namespace WeightTracker.Controllers
             return weightsOut;
         }
 
+        [Authorize]
         [HttpGet("api/[controller]/{weightId}")]
         public IActionResult GetWeightById(int weightId)
         {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            string username = claimsIdentity.FindFirst(ClaimTypes.Name).Value;
+            User user = _repository.GetUserByUsername(username);
+
             WeightProgress? weight = _repository.GetWeight(weightId);
-            if (weight == null) return NotFound();
+            if (weight == null || weight.UserId != user.Id) return NotFound();
 
             WeightDTO weightOut = new WeightDTO
             {
@@ -50,15 +62,17 @@ namespace WeightTracker.Controllers
             return Ok(weightOut);
         }
 
+        [Authorize]
         [HttpPost("api/[controller]")]
         public ActionResult<WeightDTO> PostWeights(WeightInDTO weight)
         {
-            User? user = _repository.GetUser(weight.UserId);
-            if (user == null) return NotFound();
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            string username = claimsIdentity.FindFirst(ClaimTypes.Name).Value;
+            User user = _repository.GetUserByUsername(username);
             
             WeightProgress weightProgress = new WeightProgress
             {
-                UserId = weight.UserId,
+                UserId = user.Id,
                 Weight = weight.Weight,
                 Date = weight.Date == DateTime.MinValue ? DateTime.Now : weight.Date,   
                 DateCreated = DateTime.Now,
@@ -69,21 +83,31 @@ namespace WeightTracker.Controllers
             return CreatedAtAction(nameof(GetWeightById), new { weightId = weightProgress.Id }, weightProgress);
         }
 
+        [Authorize]
         [HttpDelete("api/[controller]/{weightId}")]
         public IActionResult DeleteWeight(int weightId)
         {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            string username = claimsIdentity.FindFirst(ClaimTypes.Name).Value;
+            User user = _repository.GetUserByUsername(username);
+
             WeightProgress? weight = _repository.GetWeight(weightId);
-            if (weight == null) return NotFound();
+            if (weight == null || weight.UserId != user.Id) return NotFound();
 
             _repository.DeleteWeightProgress(weight);
             return NoContent();
         }
 
+        [Authorize]
         [HttpPut("api/[controller]/{weightId}")]
         public IActionResult UpdateWeightProgress(int weightId, WeightInDTO weightUpdate)
         {
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            string username = claimsIdentity.FindFirst(ClaimTypes.Name).Value;
+            User user = _repository.GetUserByUsername(username);
+
             WeightProgress? weight = _repository.GetWeight(weightId);
-            if (weight == null) return NotFound();
+            if (weight == null || weight.UserId != user.Id) return NotFound();
 
             weight.Weight = weightUpdate.Weight;
             weight.DateModified = DateTime.Now;
@@ -95,9 +119,11 @@ namespace WeightTracker.Controllers
         [HttpGet("api/Users/{userId}/WeightProgress")]
         public IActionResult GetWeightsByUserId(int userId)
         {
-            if (userId < 0) return BadRequest();
-            User? user = _repository.GetUser(userId);
-            if (user == null) return NotFound();
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            string username = claimsIdentity.FindFirst(ClaimTypes.Name).Value;
+            User user = _repository.GetUserByUsername(username);
+
+            if (userId < 0 || userId != user.Id ) return BadRequest();
 
             IEnumerable<WeightProgress> weights = _repository.GetWeightProgressByUserId(userId);
             IEnumerable<WeightDTO> weightsOut = weights.Select(weight => new WeightDTO
@@ -111,11 +137,16 @@ namespace WeightTracker.Controllers
             return Ok(weightsOut);
         }
 
+        [Authorize]
         [HttpPost("api/Users/{userId}/WeightProgress")]
         public IActionResult AddWeightByUserId(int userId, WeightInDTO weight)
         {
-            User? user = _repository.GetUser(userId);
-            if (user == null) return NotFound();
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            string username = claimsIdentity.FindFirst(ClaimTypes.Name).Value;
+            User user = _repository.GetUserByUsername(username);
+
+            if (userId != user.Id) return BadRequest(); 
+
             WeightProgress weightProgress = new WeightProgress
             {
                 UserId = userId,

@@ -14,10 +14,8 @@ namespace WeightTracker.Data
         public User AddUser(User user)
         {
             User? existingUser = GetUserByUsername(user.UserName);
-            if (existingUser != null)
-            {
-                throw new UsernameAlreadyExistsException("Username already exists.", user.UserName);
-            }
+            if (existingUser != null) throw new UsernameAlreadyExistsException("Username already exists.", user.UserName);
+
             _dbContext.Users.Add(user);
             _dbContext.SaveChanges();
             return user;
@@ -28,6 +26,21 @@ namespace WeightTracker.Data
             _dbContext.WeightProgresses.Add(weightProgress);
             _dbContext.SaveChanges();
             return weightProgress;
+        }
+
+        public Boolean CheckUserPassword(String username, string password)
+        {
+            User? user = GetUserByUsername(username);
+            if (user == null) throw new UsernameNotFoundException("Username and password do not match.");
+
+            if (user.Password != password) return false;
+            return true;
+        }
+
+        public Boolean CheckUserPassword(User user, String password)
+        {
+            if (user.Password != password) return false;
+            return true;
         }
 
         public void DeleteUser(User user)
