@@ -45,6 +45,10 @@ namespace WeightTracker.Data
 
         public void DeleteUser(User user)
         {
+            IEnumerable<WeightProgress> weightProgresses = GetWeightProgressByUserId(user.Id);
+            foreach (WeightProgress weightProgress in weightProgresses)
+                _dbContext.WeightProgresses.Remove(weightProgress);
+
             _dbContext.Remove(user);
             _dbContext.SaveChanges();
         }
