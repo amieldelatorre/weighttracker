@@ -6,6 +6,8 @@ namespace WeightTracker.Data
     {
         IEnumerable<User> GetAllUsers();
         User? GetUserByUsername(String username);
+        Boolean CheckUserPassword(string username, String password);
+        Boolean CheckUserPassword(User user, String password);
         User? GetUser(int userId);
         User AddUser(User user);   
         User UpdateUser(User user);

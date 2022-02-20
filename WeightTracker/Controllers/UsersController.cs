@@ -2,6 +2,9 @@
 using WeightTracker.Data;
 using WeightTracker.Models;
 using WeightTracker.Dtos;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using WeightTracker.Exceptions;
 
 namespace WeightTracker.Controllers
 {
@@ -17,11 +20,15 @@ namespace WeightTracker.Controllers
             _repository = repository;   
         }
 
+        [Authorize]
         [HttpGet("api/[controller]")]
-        public IEnumerable<UserDTO> GetUsers()
+        public UserDTO GetUsers()
         {
-            IEnumerable<User> users = _repository.GetAllUsers();
-            IEnumerable<UserDTO> usersOut = users.Select(user => new UserDTO
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            string username = claimsIdentity.FindFirst(ClaimTypes.Name).Value;
+            User user = _repository.GetUserByUsername(username);
+
+            UserDTO userOut = new UserDTO
             {
                 Id = user.Id,
                 FirstName = user.FirstName,
@@ -31,15 +38,19 @@ namespace WeightTracker.Controllers
                 WeekStart = user.WeekStart,
                 PreferredUnits = user.PreferredUnits,
                 DateModified = user.DateModified
-            });
-            return usersOut;
+            };
+            return userOut;
         }
 
+        [Authorize]
         [HttpGet("api/[controller]/{userId}")]
         public IActionResult GetUserById(int userId)
         {
-            User? user = _repository.GetUser(userId);
-            if (user == null) return NotFound();
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            string username = claimsIdentity.FindFirst(ClaimTypes.Name).Value;
+            User user = _repository.GetUserByUsername(username);
+
+            if (userId != user.Id) return NotFound();
 
             return Ok(user);
         }
@@ -59,25 +70,40 @@ namespace WeightTracker.Controllers
                 DateModified = DateTime.Now
             };
 
-            _repository.AddUser(newUser);
+            try
+            {
+                _repository.AddUser(newUser);
+            }
+            catch (UsernameAlreadyExistsException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             return CreatedAtAction(nameof(GetUserById), new { userId = newUser.Id }, newUser);
         }
 
+        [Authorize]
         [HttpDelete("api/[controller]/{userId}")]
         public IActionResult DeleteUser(int userId)
         {
-            User? user = _repository.GetUser(userId);
-            if (user == null) return NotFound();
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            string username = claimsIdentity.FindFirst(ClaimTypes.Name).Value;
+            User user = _repository.GetUserByUsername(username);
+
+            if (userId != user.Id) return NotFound();
 
             _repository.DeleteUser(user);
             return NoContent();
         }
 
+        [Authorize]
         [HttpPut("api/[controller]/{userId}")]
         public IActionResult UpdateUser(int userId, UserInDTO userUpdate)
         {
-            User? user = _repository.GetUser(userId);
-            if (user == null) return NotFound();
+            var claimsIdentity = this.User.Identity as ClaimsIdentity;
+            string username = claimsIdentity.FindFirst(ClaimTypes.Name).Value;
+            User user = _repository.GetUserByUsername(username);
+
+            if (userId != user.Id) return NotFound();
 
             user.FirstName = userUpdate.FirstName;
             user.LastName = userUpdate.LastName;
