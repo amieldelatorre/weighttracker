@@ -9,7 +9,10 @@ namespace WeightTracker.Data
         {
             optionsBuilder.UseSqlite("DataSource=WeightTrackerDB.sqlite");
         }
-        public WeightTrackerDBContext(DbContextOptions<WeightTrackerDBContext> options): base(options) { }
+        public WeightTrackerDBContext(DbContextOptions<WeightTrackerDBContext> options): base(options) 
+        { 
+            Database.EnsureCreated();
+        }
         public DbSet<User> Users { get; set; }
         public DbSet<WeightProgress> WeightProgresses { get; set; }
     }
