@@ -40,6 +40,16 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+string allowAll = "allowAll";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(allowAll, builder =>
+    {
+        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -49,11 +59,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors(allowAll);
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
+
+
 
 app.Run();

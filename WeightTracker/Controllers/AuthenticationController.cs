@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using WeightTracker.Exceptions;
 
 namespace WeightTracker.Controllers
 {
@@ -32,23 +33,30 @@ namespace WeightTracker.Controllers
         [Route("api/[controller]/login")]
         public async Task<IActionResult> Login(LoginModel loginDetails)
         {
-            if (_repository.CheckUserPassword(loginDetails.Username, loginDetails.Password))
+            try
             {
-                var authclaims = new List<Claim>
+                if (_repository.CheckUserPassword(loginDetails.Username, loginDetails.Password))
+                {
+                    var authclaims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, loginDetails.Username),
                     new Claim(JwtRegisteredClaimNames.Jti, loginDetails.Username)
                 };
 
-                var token = GetToken(authclaims);
+                    var token = GetToken(authclaims);
 
-                return Ok(new
-                {
-                    token = new JwtSecurityTokenHandler().WriteToken(token),
-                    expiration = token.ValidTo
-                });
+                    return Ok(new
+                    {
+                        token = new JwtSecurityTokenHandler().WriteToken(token),
+                        expiration = token.ValidTo
+                    });
+                }
+                return Unauthorized();
             }
-            return Unauthorized();
+            catch (UsernameNotFoundException ex)
+            {
+                return Unauthorized(ex.Message);    
+            }
         }
 
         [HttpPost]
