@@ -2,7 +2,7 @@ name: dotnet build
 
 on: 
   push:
-    branches: ["master"]
+    branches: ["main"]
   # pull_request:
     # branches: ["master"]
 
@@ -14,7 +14,7 @@ jobs:
       matrix:
         dotnet-version: ['7.0.x' ]
     env:
-      working-directory: ./healthTracker
+      working-directory: ./backend/WeightTracker
     
 
     steps:
