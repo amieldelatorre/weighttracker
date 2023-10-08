@@ -20,7 +20,7 @@ namespace WeightTracker.Controllers
 
         [HttpPost]
         [Produces("application/json")]
-        public IActionResult CreateUser(UserCreate userCreateData)
+        public ActionResult CreateUser(UserCreate userCreateData)
         {
             try
             {
@@ -38,12 +38,19 @@ namespace WeightTracker.Controllers
                         }
                     );
                 }
+
                 User newUser = userCreateData.CreateUser();
-                _userRepo.Add(newUser);
+                bool add_success = _userRepo.Add(newUser);
+
+                if (!add_success)
+                {
+                    _logger.Log(LogLevel.Error, "Failed to create user, database insert failure");
+                    return StatusCode(StatusCodes.Status500InternalServerError, "Server is currently unable to handle your request");
+                }
 
                 UserOutput userOutput = new(newUser);
-
                 _logger.Log(LogLevel.Information, "Successfully created a new user.");
+
                 return CreatedAtAction(null, null, userOutput);
             }
             catch (Exception ex)

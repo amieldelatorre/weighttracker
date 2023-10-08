@@ -48,6 +48,10 @@ namespace WeightTracker.Models
             if (DateOfBirth >  dateToday)
                 AddToErrors(nameof(DateOfBirth), "Date of birth cannot be greater than today");
 
+            // Validate gender
+            if (!Enum.IsDefined(typeof(GenderEnum), Gender))
+                AddToErrors(nameof(Gender), "Gender values are MALE or FEMALE");
+
             // Validate height
             if (Height < 0)
                 AddToErrors(nameof(Height), "Height cannot be less than 0");
