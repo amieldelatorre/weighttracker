@@ -20,7 +20,7 @@ namespace WeightTracker.Controllers
 
         [HttpPost]
         [Produces("application/json")]
-        public ActionResult CreateUser(UserCreate userCreateData)
+        async public Task<ActionResult> CreateUser(UserCreate userCreateData)
         {
             try
             {
@@ -29,18 +29,18 @@ namespace WeightTracker.Controllers
                 if (!userCreateData.IsValid(_userRepo))
                 {
                     _logger.Log(LogLevel.Debug, "Create new user has invalid data.");
-                    return BadRequest(
+                    return UnprocessableEntity(
                         new
                         {
                             errors = userCreateData.GetErrors(),
-                            status = HttpStatusCode.BadRequest,
+                            status = HttpStatusCode.UnprocessableEntity,
                             title = "One or more validation errors occurred."
                         }
                     );
                 }
 
                 User newUser = userCreateData.CreateUser();
-                bool add_success = _userRepo.Add(newUser);
+                bool add_success = await _userRepo.Add(newUser);
 
                 if (!add_success)
                 {

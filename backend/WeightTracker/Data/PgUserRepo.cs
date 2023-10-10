@@ -11,9 +11,9 @@ namespace WeightTracker.Data
             _context = context;
         }
 
-        public bool Add(User user)
+        async public Task<bool> Add(User user)
         {
-            _context.Users.Add(user);
+            await _context.Users.AddAsync(user);
             int numberOfChangesSaved = _context.SaveChanges();
             return numberOfChangesSaved > 0;
         }

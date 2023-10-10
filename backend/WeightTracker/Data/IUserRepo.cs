@@ -4,7 +4,7 @@ namespace WeightTracker.Data
 {
     public interface IUserRepo
     {
-        bool Add(User user);
+        Task<bool> Add(User user);
         bool EmailExists(string email);
     }
 }
