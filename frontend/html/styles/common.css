@@ -50,3 +50,45 @@ button[type=submit] {
   text-align: left;
   margin-bottom: 7px;
 }
+
+.modal {
+  padding: 20px;
+  z-index: 99;
+  border-radius: 6px;
+  border: 1px red solid;
+  max-width: 500px;
+  min-width: 300px;
+  width: auto;
+  position: absolute;
+  top: 5%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  background-color: white;
+  display: none;
+}
+
+.modal-exit {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding-top: 8px;
+  padding-right: 16px;
+  cursor: pointer;
+  font-size: 35px;
+}
+
+#error-modal-heading {
+  margin-bottom: 7px;
+  color: rgb(189, 55, 55);
+}
+
+.error-modal p {
+  margin-left: 5px;
+  font-size: 1em;
+}
+
+.error-modal ul {
+  margin-left: 30px;
+  font-size: .9em;
+  list-style-type: circle;
+}
