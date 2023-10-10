@@ -18,6 +18,17 @@ builder.Services.AddDbContext<WeightTrackerDbContext>(
 );
 builder.Services.AddScoped<IUserRepo, PgUserRepo>();
 
+string AnyOriginCorsPolicyName = "AllowAnyOrigin";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: AnyOriginCorsPolicyName, builder =>
+    {
+        builder.AllowAnyOrigin()
+        .AllowAnyHeader()
+        .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -27,6 +38,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors(AnyOriginCorsPolicyName);
 app.UseAuthorization();
 
 app.MapControllers();
