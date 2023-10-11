@@ -11,23 +11,31 @@ function validatePasswordMatch() {
 }
 
 function setValidationErrorModal(errorJSONPromise) {
-  const errorModal = document.getElementById("signup-form-error-modal");
+  let wrapper = document.getElementById("wrapper");
+
+  let notificationModal = document.createElement("div");
+  notificationModal.id = "notification-modal";
+  notificationModal.classList.add("modal");
+  notificationModal.classList.add("error-modal");
+
+  let notificationModalExit = document.createElement("span");
+  notificationModalExit.classList = "modal-exit";
+  notificationModalExit.onclick = clearNotification;
+  notificationModalExit.innerHTML = "&times;";
+  notificationModal.appendChild(notificationModalExit);
+
   let errorModalHeading = document.createElement("h2");
-  errorModalHeading.id = "error-modal-heading";
+  errorModalHeading.id = "modal-heading";
   errorModalHeading.innerText = "Input Errors!";
-
-  errorModal.appendChild(errorModalHeading);
-
+  notificationModal.appendChild(errorModalHeading);
 
   errorJSONPromise.then(errorJSON => {
-  
-    for (const [errorFieldName, fieldErrorList] of Object.entries(errorJSON)) {
+    for (const[errorFieldName, fieldErrorList] of Object.entries(errorJSON)) {
       let newErrorSection = document.createElement("section");
-
       let newErrorSectionLabel = document.createElement("p");
       newErrorSectionLabel.innerText = errorFieldName;
       newErrorSection.appendChild(newErrorSectionLabel);
-  
+
       let newErrorSectionList = document.createElement("ul");
       newErrorSection.appendChild(newErrorSectionList);
       fieldErrorList.forEach((elem) => {
@@ -37,26 +45,11 @@ function setValidationErrorModal(errorJSONPromise) {
         newErrorSectionList.appendChild(newErrorItem);
       });
   
-      errorModal.appendChild(newErrorSection); 
+      notificationModal.appendChild(newErrorSection); 
     }
-  
   });
-  errorModal.style.display = "block";
-}
 
-function setUnableToProcessRequestModal() {
-  const errorModal = document.getElementById("signup-form-error-modal");
-
-  let errorModalHeading = document.createElement("h2");
-  errorModalHeading.id = "error-modal-heading";
-  errorModalHeading.innerText = "Unable to process request 😞";
-  errorModal.appendChild(errorModalHeading);
-
-  let errorModalText = document.createElement("p");
-  errorModalText.innerText = "Please try again later and if problem persists, please contact the administrator.";
-  errorModal.appendChild(errorModalText);
-
-  errorModal.style.display = "block";
+  wrapper.insertBefore(notificationModal, wrapper.firstChild);
 }
 
 function handleSignupFormSubmit() {
@@ -91,19 +84,37 @@ function handleSignupFormSubmit() {
     })
     .then(response => {
       if (response.ok) {
-        window.location.replace(`/login?signup=success`)
+        window.location.replace(`/login?signup=success`);
       }
       else {
-        if (response.status === 422) {
+        if (response.status === 400) {
           let errorJSONPromise = response.json().then(err => err["errors"]);
           setValidationErrorModal(errorJSONPromise);
         } else {
-          setUnableToProcessRequestModal();
+          clearNotification();
+
+          let notification = {
+            type: "error",
+            title: "Unable to process request 😞",
+            messages: [
+              "Please try again later and if problem persists, please contact the administrator."
+            ]
+          };
+          addGenericNotification(notification);
         }
       }
     })
     .catch(error => {
-      alert(error)
+      clearNotification();
+
+      let notification = {
+        type: "error",
+        title: "Unable to reach server 😞",
+        messages: [
+          "Please try again later and if problem persists, please contact the administrator."
+        ]
+      };
+      addGenericNotification(notification);
     });
   });
 }
@@ -135,15 +146,35 @@ window.addEventListener("load", () => {
 //       window.location.replace(`/login?signup=success`)
 //     }
 //     else {
-//       if (res.status === 422) {
+//       if (res.status === 400) {
 //         let errorJSONPromise = res.json().then(err => err["errors"]);
+//         clearNotification();
 //         setValidationErrorModal(errorJSONPromise);
+        
 //       } else {
-//         setUnableToProcessRequestModal();
+//         clearNotification();
+
+//         let notification = {
+//           type: "error",
+//           title: "Unable to process request 😞",
+//           messages: [
+//             "Please try again later and if problem persists, please contact the administrator."
+//           ]
+//         };
+//         addGenericNotification(notification);
 //       }
 //     }
 //   })
 //   .catch(err => {
-//     alert(err)
+//     clearNotification();
+
+//     let notification = {
+//       type: "error",
+//       title: "Unable to reach server 😞",
+//       messages: [
+//         "Please try again later and if problem persists, please contact the administrator."
+//       ]
+//     };
+//     addGenericNotification(notification);
 //   });
 // });

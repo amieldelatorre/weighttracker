@@ -64,7 +64,6 @@ button[type=submit] {
   left: 50%;
   transform: translate(-50%, 0);
   background-color: white;
-  display: none;
 }
 
 .modal-exit {
@@ -77,7 +76,7 @@ button[type=submit] {
   font-size: 35px;
 }
 
-#error-modal-heading {
+#modal-heading {
   margin-bottom: 7px;
   color: rgb(189, 55, 55);
 }
