@@ -29,11 +29,11 @@ namespace WeightTracker.Controllers
                 if (!userCreateData.IsValid(_userRepo))
                 {
                     _logger.Log(LogLevel.Debug, "Create new user has invalid data.");
-                    return UnprocessableEntity(
+                    return BadRequest(
                         new
                         {
                             errors = userCreateData.GetErrors(),
-                            status = HttpStatusCode.UnprocessableEntity,
+                            status = HttpStatusCode.BadRequest,
                             title = "One or more validation errors occurred."
                         }
                     );

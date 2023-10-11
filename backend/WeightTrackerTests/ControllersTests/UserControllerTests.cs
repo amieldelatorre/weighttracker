@@ -26,7 +26,7 @@ namespace WeightTrackerTests.ControllersTests
         {
             _mockUserRepo.Setup(repo => repo.EmailExists(user.Email)).Returns(emailExists);
             _mockUserRepo.Setup(repo => repo.Add(It.IsAny<User>())).Returns(Task.FromResult(createUserResult));
-            var result = _userController.CreateUser(user).Result as ObjectResult;
+            var result = _userController.CreateUser(user).GetAwaiter().GetResult() as ObjectResult;
            
             if (result == null)
                 Assert.Fail("Null result when adding a new user");
@@ -50,7 +50,7 @@ namespace WeightTrackerTests.ControllersTests
                 },
                 false, // Email doesn't exist
                 false, // Create user result
-                422,   // Expected Status Code
+                400,   // Expected Status Code
             },
             new object[]
             {
@@ -66,7 +66,7 @@ namespace WeightTrackerTests.ControllersTests
                 },
                 false, // Email doesn't exist
                 false, // Create user result
-                422,   // Expected Status Code
+                400,   // Expected Status Code
             },
             new object[]
             {
@@ -82,7 +82,7 @@ namespace WeightTrackerTests.ControllersTests
                 },
                 true, // Email doesn't exist
                 false, // Create user result
-                422,   // Expected Status Code
+                400,   // Expected Status Code
             },
             new object[]
             {
