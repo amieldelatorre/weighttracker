@@ -20,7 +20,7 @@ namespace WeightTrackerTests.ModelsTests
         public void UserCreateValidationTest(UserCreate user, bool emailExists , bool expectedValidationResult, int expectedNumErrors)
         {
             // Setup check for email exists according to parameter
-            _mockUserRepo.Setup(repo => repo.EmailExists(user.Email)).Returns(emailExists);
+            _mockUserRepo.Setup(repo => repo.EmailExists(user.Email)).Returns(Task.FromResult(emailExists));
 
             bool validationResult = user.IsValid(_mockUserRepo.Object);
             int numErrors = GetNumErrors(user.GetErrors());

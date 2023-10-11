@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
+using WeightTracker.Authentication;
 using WeightTracker.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +19,8 @@ builder.Services.AddDbContext<WeightTrackerDbContext>(
     //options => options.UseNpgsql(builder.Configuration.GetConnectionString("WebAPIDatabaseConnection"))
 );
 builder.Services.AddScoped<IUserRepo, PgUserRepo>();
+
+builder.Services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
 
 string AnyOriginCorsPolicyName = "AllowAnyOrigin";
 builder.Services.AddCors(options =>
@@ -39,6 +43,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors(AnyOriginCorsPolicyName);
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

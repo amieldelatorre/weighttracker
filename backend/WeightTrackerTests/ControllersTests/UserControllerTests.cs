@@ -24,7 +24,7 @@ namespace WeightTrackerTests.ControllersTests
         [Test, TestCaseSource(nameof(UserControllerCreateUserTestProvider))]
         public void CreateUserTest(UserCreate user, bool emailExists, bool createUserResult, int expectedStatusCode)
         {
-            _mockUserRepo.Setup(repo => repo.EmailExists(user.Email)).Returns(emailExists);
+            _mockUserRepo.Setup(repo => repo.EmailExists(user.Email)).Returns(Task.FromResult(emailExists));
             _mockUserRepo.Setup(repo => repo.Add(It.IsAny<User>())).Returns(Task.FromResult(createUserResult));
             var result = _userController.CreateUser(user).GetAwaiter().GetResult() as ObjectResult;
            

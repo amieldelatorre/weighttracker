@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using WeightTracker.Data;
 using WeightTracker.Models;
@@ -16,6 +17,15 @@ namespace WeightTracker.Controllers
         {
             _logger = logger;
             _userRepo = userRepo;
+        }
+
+        [Authorize]
+        [HttpGet]
+        [Produces("application/json")]
+        async public Task<ActionResult> GetUserFromCredentials()
+        {
+
+            return Ok();
         }
 
         [HttpPost]
