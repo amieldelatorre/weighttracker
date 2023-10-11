@@ -1,6 +1,6 @@
 name: dotnet build
 
-on: ["push", "pull_request", "tag"]
+on: ["push", "pull_request"]
 
 jobs:
   build:
