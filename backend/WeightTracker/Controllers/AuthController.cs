@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WeightTracker.Data;
+using WeightTracker.Models;
 
 namespace WeightTracker.Controllers
 {
@@ -18,10 +19,17 @@ namespace WeightTracker.Controllers
         }
 
         [HttpPost("login")]
-        [Authorize]
-        public ActionResult Login()
+        async public Task<ActionResult> Login(UserLogin userLogin)
         {
-            return Ok();
+            _logger.Log(LogLevel.Information, "User is attempting to login");
+            if (await _userRepo.IsValidLogin(userLogin.Email, userLogin.Password))
+            {
+                _logger.Log(LogLevel.Debug, "Successful login attempt");
+                return Ok();
+            }
+
+            _logger.Log(LogLevel.Debug, "Unsuccessful login attempt");
+            return Unauthorized();
         }
     }
 }
