@@ -56,8 +56,9 @@ namespace WeightTracker.Controllers
             try
             {
                 _logger.Log(LogLevel.Information, "Creating new user.");
+                bool dataIsValid = await userCreateData.IsValid(_userRepo);
 
-                if (!userCreateData.IsValid(_userRepo))
+                if (!dataIsValid)
                 {
                     _logger.Log(LogLevel.Debug, "Create new user has invalid data.");
                     return BadRequest(

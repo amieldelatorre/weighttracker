@@ -6,29 +6,42 @@ function clearNotification() {
   }
 }
 
-function addGenericNotification(notification) {
-  let wrapper = document.getElementById("wrapper");
-
+function createNotificationModal(notificationType) {
   let notificationModal = document.createElement("div");
   notificationModal.id = "notification-modal";
   notificationModal.classList.add("modal");
 
-  if (notification.type === "error") {
+  if (notificationType === "error") {
     notificationModal.classList.add("error-modal")
-  } else if (notification.type === "success") {
+  } else if (notificationType === "success") {
     notificationModal.classList.add("success-modal")
   }
+  
+  return notificationModal;
+}
 
+function createNotificationModalExit() {
   let notificationModalExit = document.createElement("span");
   notificationModalExit.classList = "modal-exit";
   notificationModalExit.onclick = clearNotification;
   notificationModalExit.innerHTML = "&times;";
-  notificationModal.appendChild(notificationModalExit);
 
+  return notificationModalExit;
+}
+
+function createNotificationModalTitle(notificationTitle) {
   let notificationModalTitle = document.createElement("h2");
   notificationModalTitle.id = "modal-heading";
-  notificationModalTitle.innerText = notification.title;
-  notificationModal.appendChild(notificationModalTitle);
+  notificationModalTitle.innerText = notificationTitle;
+  return notificationModalTitle;
+}
+
+function addGenericNotification(notification) {
+  let wrapper = document.getElementById("wrapper");
+  let notificationModal = createNotificationModal(notification.type);
+  
+  notificationModal.appendChild(createNotificationModalExit());
+  notificationModal.appendChild(createNotificationModalTitle(notification.title));
 
   notification.messages.forEach((message) => {
     let messageElement = document.createElement("p");

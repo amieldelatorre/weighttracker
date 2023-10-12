@@ -1,0 +1,42 @@
+.login-form-fields {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-form button[type=submit] {
+  border-radius: 6px;
+  display: block;
+  padding: 3px;
+  margin: 10px auto 5px auto;
+  background-color: #76c6e0;
+  width: 60%;
+}
+
+.login-form .input-field {
+  width: 100%;
+  display: flex;
+  margin: 5px auto 7px auto;
+}
+
+.login-form-container {
+  text-align: center;
+  padding: 5px;
+  width: 50%;
+  border-radius: 6px;
+  border: 1px black solid;
+  margin: 30px auto 20px auto;
+}
+
+.login-form-fields .input-field label {
+  margin-right: 10px;
+  width: 20%;
+  min-width: 80px;
+  text-align: right;
+}
+
+.login-form-fields .input-field input {
+  width: 60%;
+  min-width: 200px;
+}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="styles/common.css">
+    <link rel="stylesheet" href="styles/login.css">
+    <script src="scripts/config.js"></script>
+    <script src="scripts/common.js"></script>
+    <script src="scripts/login.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&family=Roboto:wght@500&display=swap" rel="stylesheet">
+
+    <title>WeightTracker - Login</title>
+  </head>
+  <body>
+    <div class="wrapper" id="wrapper">
+      <div class="form-container login-form-container">
+        
+        <h2 class="form-title">Login</h2>
+        <div class="form-icon-container">
+          <img class="form-icon-silhoutte" src="images/user-silhouette-svgrepo-com.svg"/>
+        </div><!--End of form-icon div-->
+
+        <form action="" class="login-form" id="login-form">
+          <div class="login-form-fields">
+
+            <div class="input-field">
+              <label for="email">Email:</label>
+              <input type="email" id="email" name="email" placeholder="e.g. james.smith@example.com" required>
+            </div>
+
+            <div class="input-field">
+              <label for="password">Password:</label>
+              <input type="password" id="password" name="password" minlength="8" required>
+            </div>
+
+            <button type="submit">Submit</button>
+
+          </div><!--End of login-form-fields div-->
+        </form>
+
+      </div><!--End of form-container div-->
+    </div><!--End of wrapper div-->
+  </body>
+</html>
