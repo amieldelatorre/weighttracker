@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
+using WeightTracker.Authentication;
 using WeightTracker.Controllers;
 using WeightTracker.Data;
 using WeightTracker.Enums;
@@ -13,12 +14,14 @@ namespace WeightTrackerTests.ControllersTests
         private UserController _userController;
         private readonly Mock<IUserRepo> _mockUserRepo;
         private readonly ILogger<UserController> _logger;
+        private readonly Mock<IAuthService> _mockAuthService;
 
         public UserControllerTests()
         {
             _mockUserRepo = new Mock<IUserRepo>();
             _logger = Mock.Of<ILogger<UserController>>();
-            _userController = new UserController(_logger, _mockUserRepo.Object);
+            _mockAuthService = new Mock<IAuthService>();
+            _userController = new UserController(_logger, _mockUserRepo.Object, _mockAuthService.Object);
         }
 
         [Test, TestCaseSource(nameof(UserControllerCreateUserTestProvider))]
