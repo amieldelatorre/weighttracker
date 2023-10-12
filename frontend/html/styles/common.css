@@ -6,15 +6,6 @@
   font-family: 'Roboto', sans-serif;
 }
 
-.form-container {
-  text-align: center;
-  padding: 5px;
-  width: 50%;
-  border-radius: 6px;
-  border: 1px black solid;
-  margin: 30px auto 20px auto;
-}
-
 h2.form-title {
   color: #20c8ff;
 }
@@ -35,27 +26,10 @@ input {
   border-radius: 6px;
 }
 
-button[type=submit] {
-  border-radius: 6px;
-  display: block;
-  padding: 3px;
-  margin: 10px 5px 5px auto;
-  background-color: #76c6e0;
-}
-
-.input-field {
-  width: 40%;
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-  margin-bottom: 7px;
-}
-
 .modal {
   padding: 20px;
   z-index: 99;
   border-radius: 6px;
-  border: 1px red solid;
   max-width: 500px;
   min-width: 300px;
   width: auto;
@@ -78,6 +52,33 @@ button[type=submit] {
 
 #modal-heading {
   margin-bottom: 7px;
+}
+
+.success-modal {
+  border: 3px #30f2a2 solid;
+}
+
+.success-modal #modal-heading {
+  color: #30f2a2;
+}
+
+.success-modal p {
+  margin-left: 5px;
+  font-size: 1em;
+}
+
+.success-modal ul {
+  margin-left: 30px;
+  font-size: .9em;
+  list-style-type: circle;
+}
+
+
+.error-modal {
+  border: 1px red solid;
+}
+
+.error-modal #modal-heading {
   color: rgb(189, 55, 55);
 }
 

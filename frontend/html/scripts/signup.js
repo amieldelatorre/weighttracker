@@ -12,22 +12,10 @@ function validatePasswordMatch() {
 
 function setValidationErrorModal(errorJSONPromise) {
   let wrapper = document.getElementById("wrapper");
+  let notificationModal = createNotificationModal("error");
 
-  let notificationModal = document.createElement("div");
-  notificationModal.id = "notification-modal";
-  notificationModal.classList.add("modal");
-  notificationModal.classList.add("error-modal");
-
-  let notificationModalExit = document.createElement("span");
-  notificationModalExit.classList = "modal-exit";
-  notificationModalExit.onclick = clearNotification;
-  notificationModalExit.innerHTML = "&times;";
-  notificationModal.appendChild(notificationModalExit);
-
-  let errorModalHeading = document.createElement("h2");
-  errorModalHeading.id = "modal-heading";
-  errorModalHeading.innerText = "Input Errors!";
-  notificationModal.appendChild(errorModalHeading);
+  notificationModal.appendChild(createNotificationModalExit());
+  notificationModal.appendChild(createNotificationModalTitle("Input Errors!"));
 
   errorJSONPromise.then(errorJSON => {
     for (const[errorFieldName, fieldErrorList] of Object.entries(errorJSON)) {
@@ -53,8 +41,8 @@ function setValidationErrorModal(errorJSONPromise) {
 }
 
 function handleSignupFormSubmit() {
-  let loginForm = document.getElementById("signup-form");
-  loginForm.addEventListener("submit", async (submitEvent) => {
+  let signupForm = document.getElementById("signup-form");
+  signupForm.addEventListener("submit", async (submitEvent) => {
     submitEvent.preventDefault();
 
     let firstName = document.getElementById("firstName").value;
@@ -88,6 +76,7 @@ function handleSignupFormSubmit() {
       }
       else {
         if (response.status === 400) {
+          clearNotification();
           let errorJSONPromise = response.json().then(err => err["errors"]);
           setValidationErrorModal(errorJSONPromise);
         } else {

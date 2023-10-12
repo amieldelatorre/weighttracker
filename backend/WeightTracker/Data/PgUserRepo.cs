@@ -1,4 +1,5 @@
-﻿using WeightTracker.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using WeightTracker.Models;
 
 namespace WeightTracker.Data
 {
@@ -18,10 +19,22 @@ namespace WeightTracker.Data
             return numberOfChangesSaved > 0;
         }
 
-        public bool EmailExists(string email)
+        async public Task<bool> EmailExists(string email)
         {
-            User? user = _context.Users.FirstOrDefault(u => u.Email == email);
+            User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
             return user != null;
+        }
+
+        async public Task<User?> GetByEmail(string email)
+        {
+            User? user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            return user;
+        }
+
+        public async Task<bool> IsValidLogin(string email, string password)
+        {
+            User? user = await _context.Users.FirstOrDefaultAsync(u =>u.Email == email);
+            return (user != null && BCrypt.Net.BCrypt.Verify(password, user.Password));
         }
     }
 }

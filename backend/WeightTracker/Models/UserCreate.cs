@@ -16,13 +16,13 @@ namespace WeightTracker.Models
         public required double Height { get; set; }
         private Dictionary<string, List<string>> Errors {  get; set; } = new Dictionary<string, List<string>>();
 
-        public bool IsValid(IUserRepo userRepo)
+        async public Task<bool> IsValid(IUserRepo userRepo)
         {
-            FindErrors(userRepo);
+            await FindErrors(userRepo);
             return Errors.Count == 0;
         }
 
-        public void FindErrors(IUserRepo userRepo)
+        async public Task FindErrors(IUserRepo userRepo)
         {
             string nullOrEmptyMessage = "Cannot be null or empty";
             string emailExistsMessage = "Email already exists";
@@ -36,7 +36,7 @@ namespace WeightTracker.Models
             // Validate email
             if (string.IsNullOrEmpty(Email.Trim()))
                 AddToErrors(nameof(Email), nullOrEmptyMessage);
-            if (userRepo.EmailExists(Email.Trim()))
+            if (await userRepo.EmailExists(Email.Trim()))
                 AddToErrors(nameof(Email), emailExistsMessage);
 
             // Validate password
