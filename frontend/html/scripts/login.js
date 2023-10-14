@@ -13,6 +13,7 @@ async function handleLoginFormSubmit() {
 
     await fetch(URL=`${API_URL}/Auth/login`, {
       method: "POST",
+      cors: "no-cors",
       headers: {
         "Content-Type": "application/json"
       },

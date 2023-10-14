@@ -30,20 +30,20 @@ namespace WeightTracker.Controllers
         {
             try
             {
-                _logger.Log(LogLevel.Debug, "Retrieving user using Claims Identity");
+                _logger.LogDebug("Retrieving user using Claims Identity");
 
                 User? user = await _userRepo.GetByEmail(_authService.GetEmailFromClaims());
                 // In reality, if you've made it this far the user should exist
                 if (user == null)
                     return NotFound();
                 UserOutput userOutput = new(user);
-                _logger.Log(LogLevel.Information, "Retrieved user using Claims Identity");
+                _logger.LogInformation("Retrieved user using Claims Identity");
 
                 return Ok(userOutput);
             }
             catch (Exception ex)
             {
-                _logger.Log(LogLevel.Error, $"Failed to retrieve user: {ex.Message}");
+                _logger.LogError($"Failed to retrieve user: {ex.Message}");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Server is currently unable to handle your request");
             }
             
@@ -55,12 +55,12 @@ namespace WeightTracker.Controllers
         {
             try
             {
-                _logger.Log(LogLevel.Information, "Creating new user.");
+                _logger.LogInformation("Creating new user.");
                 bool dataIsValid = await userCreateData.IsValid(_userRepo);
 
                 if (!dataIsValid)
                 {
-                    _logger.Log(LogLevel.Debug, "Create new user has invalid data.");
+                    _logger.LogDebug("Create new user has invalid data.");
                     return BadRequest(
                         new
                         {
@@ -76,18 +76,18 @@ namespace WeightTracker.Controllers
 
                 if (!add_success)
                 {
-                    _logger.Log(LogLevel.Error, "Failed to create user, database insert failure");
+                    _logger.LogError("Failed to create user, database insert failure");
                     return StatusCode(StatusCodes.Status500InternalServerError, "Server is currently unable to handle your request");
                 }
 
                 UserOutput userOutput = new(newUser);
-                _logger.Log(LogLevel.Information, "Successfully created a new user.");
+                _logger.LogInformation("Successfully created a new user.");
 
                 return CreatedAtAction(null, null, userOutput);
             }
             catch (Exception ex)
             {
-                _logger.Log(LogLevel.Error, $"Failed to create user: {ex.Message}");
+                _logger.LogError($"Failed to create user: {ex.Message}");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Server is currently unable to handle your request");
             }
             
