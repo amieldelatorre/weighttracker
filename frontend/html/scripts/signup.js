@@ -65,6 +65,7 @@ function handleSignupFormSubmit() {
 
     await fetch(URL=`${API_URL}/User`, {
       method: "POST",
+      cors: "no-cors",
       headers: {
         "Content-Type": "application/json"
       },

@@ -1,7 +1,12 @@
+using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System.Diagnostics;
 using WeightTracker.Authentication;
 using WeightTracker.Data;
+using WeightTracker.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,8 +41,24 @@ builder.Services.AddCors(options =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+builder.Services.AddHealthChecks()
+    .AddCheck<EFDbHealthCheck>("EfDbHealthCheck");
+
 
 var app = builder.Build();
+
+// Check if able to connect to database on startup
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<WeightTrackerDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<WeightTrackerDbContext>>();
+    if (!dbContext.Database.CanConnect())
+    {
+        logger.LogError("Unable to connect to database. Exiting.");
+        Environment.Exit(1);
+    }
+    logger.LogDebug("Able to connect to database. Proceeding with startup.");
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -51,5 +72,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHealthChecks("health", new HealthCheckOptions 
+{ 
+    ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+});
 
 app.Run();

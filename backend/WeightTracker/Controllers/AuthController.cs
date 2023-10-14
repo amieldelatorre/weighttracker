@@ -21,14 +21,14 @@ namespace WeightTracker.Controllers
         [HttpPost("login")]
         async public Task<ActionResult> Login(UserLogin userLogin)
         {
-            _logger.Log(LogLevel.Information, "User is attempting to login");
+            _logger.LogInformation("User is attempting to login");
             if (await _userRepo.IsValidLogin(userLogin.Email, userLogin.Password))
             {
-                _logger.Log(LogLevel.Debug, "Successful login attempt");
+                _logger.LogDebug("Successful login attempt");
                 return Ok();
             }
 
-            _logger.Log(LogLevel.Debug, "Unsuccessful login attempt");
+            _logger.LogDebug("Unsuccessful login attempt");
             return Unauthorized();
         }
     }
