@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace WeightTracker.Models
+namespace WeightTracker.Models.User
 {
     [Index(nameof(Email), IsUnique = true)]
     public class User
@@ -41,5 +41,6 @@ namespace WeightTracker.Models
         [Required]
         [Column(TypeName = "timestamp with time zone")]
         public required DateTime DateModified { get; set; }
+        public List<WeightTracker.Models.Weight.Weight>? Weights { get; set; }
     }
 }

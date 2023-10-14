@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using WeightTracker.Authentication;
 using WeightTracker.Controllers;
 using WeightTracker.Data;
-using WeightTracker.Models;
+using WeightTracker.Models.User;
 
 namespace WeightTrackerTests.ControllersTests
 {

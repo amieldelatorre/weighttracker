@@ -5,7 +5,7 @@ using WeightTracker.Authentication;
 using WeightTracker.Controllers;
 using WeightTracker.Data;
 using WeightTracker.Enums;
-using WeightTracker.Models;
+using WeightTracker.Models.User;
 
 namespace WeightTrackerTests.ControllersTests
 {

@@ -1,4 +1,4 @@
-﻿using WeightTracker.Models;
+﻿using WeightTracker.Models.User;
 
 namespace WeightTracker.Data
 {

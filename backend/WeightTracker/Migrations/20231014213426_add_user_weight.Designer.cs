@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WeightTracker.Data;
@@ -11,9 +12,11 @@ using WeightTracker.Data;
 namespace WeightTracker.Migrations
 {
     [DbContext(typeof(WeightTrackerDbContext))]
-    partial class WeightTrackerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231014213426_add_user_weight")]
+    partial class add_user_weight
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

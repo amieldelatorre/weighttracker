@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using System.Net;
 using WeightTracker.Authentication;
 using WeightTracker.Data;
-using WeightTracker.Models;
+using WeightTracker.Models.User;
 
 namespace WeightTracker.Controllers
 {

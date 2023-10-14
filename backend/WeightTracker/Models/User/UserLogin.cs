@@ -1,4 +1,4 @@
-﻿namespace WeightTracker.Models
+﻿namespace WeightTracker.Models.User
 {
     public class UserLogin
     {

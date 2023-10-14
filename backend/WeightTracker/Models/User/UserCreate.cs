@@ -2,7 +2,7 @@
 using WeightTracker.Data;
 using WeightTracker.Enums;
 
-namespace WeightTracker.Models
+namespace WeightTracker.Models.User
 {
     public class UserCreate
     {
@@ -14,7 +14,7 @@ namespace WeightTracker.Models
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public required GenderEnum Gender { get; set; }
         public required double Height { get; set; }
-        private Dictionary<string, List<string>> Errors {  get; set; } = new Dictionary<string, List<string>>();
+        private Dictionary<string, List<string>> Errors { get; set; } = new Dictionary<string, List<string>>();
 
         async public Task<bool> IsValid(IUserRepo userRepo)
         {
@@ -45,7 +45,7 @@ namespace WeightTracker.Models
 
             // Validate date of birth
             DateOnly dateToday = DateOnly.FromDateTime(DateTime.Now);
-            if (DateOfBirth >  dateToday)
+            if (DateOfBirth > dateToday)
                 AddToErrors(nameof(DateOfBirth), "Date of birth cannot be greater than today");
 
             // Validate gender
@@ -62,13 +62,13 @@ namespace WeightTracker.Models
             DateTime now = DateTime.Now.ToUniversalTime();
             User user = new()
             {
-                FirstName = this.FirstName,
-                LastName = this.LastName,
-                Email = this.Email,
-                Password = BCrypt.Net.BCrypt.HashPassword(this.Password),
-                Gender = this.Gender,
-                Height = this.Height,
-                DateOfBirth = this.DateOfBirth,
+                FirstName = FirstName,
+                LastName = LastName,
+                Email = Email,
+                Password = BCrypt.Net.BCrypt.HashPassword(Password),
+                Gender = Gender,
+                Height = Height,
+                DateOfBirth = DateOfBirth,
                 DateCreated = now,
                 DateModified = now
             };
