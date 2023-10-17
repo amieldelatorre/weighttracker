@@ -23,7 +23,7 @@ namespace WeightTrackerTests.ModelsTests
             _mockUserRepo.Setup(repo => repo.EmailExists(user.Email)).Returns(Task.FromResult(emailExists));
 
             bool validationResult = user.IsValid(_mockUserRepo.Object).GetAwaiter().GetResult();
-            int numErrors = GetNumErrors(user.GetErrors());
+            int numErrors = Helper.GetNumErrors(user.GetErrors());
             Assert.That(validationResult, Is.EqualTo(expectedValidationResult));
             Assert.That(numErrors, Is.EqualTo(expectedNumErrors));
         }
@@ -95,15 +95,5 @@ namespace WeightTrackerTests.ModelsTests
                 0      // Number of Errors
             }
         };
-
-        private int GetNumErrors(Dictionary<string, List<string>> errors)
-        {
-            int numErrors = 0;
-            foreach (var item in errors)
-            {
-                numErrors += item.Value.Count;
-            }
-            return numErrors;
-        }
     }
 }
