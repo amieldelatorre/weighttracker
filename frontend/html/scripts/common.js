@@ -1,3 +1,39 @@
+function clearCredentialsAndRedirect() {
+  localStorage.removeItem("email");
+  localStorage.removeItem("password");
+  window.location.replace("login.html");
+}
+
+async function checkLoggedIn() {
+  let email = localStorage.getItem("email");
+  let password = localStorage.getItem("password");
+  if (email === null || password === null) {
+    clearCredentialsAndRedirect();
+  } else {
+    let data = {
+      "email": email,
+      "password": password
+    }
+
+    await fetch(URL=`${API_URL}/Auth/login`, {
+      method: "POST",
+      cors: "no-cors",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    }).then(response => {
+      if (response.ok) {
+        console.log("Logged in works! Proceeding");
+      } else {
+        clearCredentialsAndRedirect();
+      }
+    }).catch(error => {
+      clearCredentialsAndRedirect();
+    });
+  }
+}
+
 function clearNotification() {
   let notificationModal = document.getElementById('notification-modal');
   
