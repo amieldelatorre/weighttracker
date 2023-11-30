@@ -14,6 +14,10 @@ h2.form-title {
   color: #20c8ff;
 }
 
+h3.form-title {
+  color: #20c8ff;
+}
+
 .form-icon-container {
   width: auto;
   overflow: hidden;
@@ -28,6 +32,15 @@ h2.form-title {
 input {
   padding: 3px;
   border-radius: 6px;
+}
+
+textarea {
+  padding: 3px;
+  border-radius: 6px;
+}
+
+.textarea-label {
+  vertical-align: top;
 }
 
 .modal {

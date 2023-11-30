@@ -87,3 +87,41 @@ function addGenericNotification(notification) {
 
   wrapper.insertBefore(notificationModal, wrapper.firstChild);
 }
+
+function setValidationErrorModal(errorJSONPromise) {
+  let wrapper = document.getElementById("wrapper");
+  let notificationModal = createNotificationModal("error");
+
+  notificationModal.appendChild(createNotificationModalExit());
+  notificationModal.appendChild(createNotificationModalTitle("Input Errors!"));
+
+  errorJSONPromise.then(errorJSON => {
+    for (const[errorFieldName, fieldErrorList] of Object.entries(errorJSON)) {
+      let newErrorSection = document.createElement("section");
+      let newErrorSectionLabel = document.createElement("p");
+      newErrorSectionLabel.innerText = errorFieldName;
+      newErrorSection.appendChild(newErrorSectionLabel);
+
+      let newErrorSectionList = document.createElement("ul");
+      newErrorSection.appendChild(newErrorSectionList);
+      fieldErrorList.forEach((elem) => {
+        let newErrorItem = document.createElement("li")
+        newErrorItem.innerText = elem;
+  
+        newErrorSectionList.appendChild(newErrorItem);
+      });
+  
+      notificationModal.appendChild(newErrorSection); 
+    }
+  });
+
+  wrapper.insertBefore(notificationModal, wrapper.firstChild);
+}
+
+function getAuthHeaderValue() {
+  let email = localStorage.getItem("email");
+  let password = localStorage.getItem("password");
+  let encodedBasicAuth = btoa(`${email}:${password}`);
+
+  return `Basic ${encodedBasicAuth}`;
+}
