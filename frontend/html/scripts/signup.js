@@ -10,36 +10,6 @@ function validatePasswordMatch() {
   }
 }
 
-function setValidationErrorModal(errorJSONPromise) {
-  let wrapper = document.getElementById("wrapper");
-  let notificationModal = createNotificationModal("error");
-
-  notificationModal.appendChild(createNotificationModalExit());
-  notificationModal.appendChild(createNotificationModalTitle("Input Errors!"));
-
-  errorJSONPromise.then(errorJSON => {
-    for (const[errorFieldName, fieldErrorList] of Object.entries(errorJSON)) {
-      let newErrorSection = document.createElement("section");
-      let newErrorSectionLabel = document.createElement("p");
-      newErrorSectionLabel.innerText = errorFieldName;
-      newErrorSection.appendChild(newErrorSectionLabel);
-
-      let newErrorSectionList = document.createElement("ul");
-      newErrorSection.appendChild(newErrorSectionList);
-      fieldErrorList.forEach((elem) => {
-        let newErrorItem = document.createElement("li")
-        newErrorItem.innerText = elem;
-  
-        newErrorSectionList.appendChild(newErrorItem);
-      });
-  
-      notificationModal.appendChild(newErrorSection); 
-    }
-  });
-
-  wrapper.insertBefore(notificationModal, wrapper.firstChild);
-}
-
 function handleSignupFormSubmit() {
   let signupForm = document.getElementById("signup-form");
   signupForm.addEventListener("submit", async (submitEvent) => {

@@ -1,3 +1,39 @@
+function clearCredentialsAndRedirect() {
+  localStorage.removeItem("email");
+  localStorage.removeItem("password");
+  window.location.replace("login.html");
+}
+
+async function checkLoggedIn() {
+  let email = localStorage.getItem("email");
+  let password = localStorage.getItem("password");
+  if (email === null || password === null) {
+    clearCredentialsAndRedirect();
+  } else {
+    let data = {
+      "email": email,
+      "password": password
+    }
+
+    await fetch(URL=`${API_URL}/Auth/login`, {
+      method: "POST",
+      cors: "no-cors",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    }).then(response => {
+      if (response.ok) {
+        console.log("Logged in works! Proceeding");
+      } else {
+        clearCredentialsAndRedirect();
+      }
+    }).catch(error => {
+      clearCredentialsAndRedirect();
+    });
+  }
+}
+
 function clearNotification() {
   let notificationModal = document.getElementById('notification-modal');
   
@@ -50,4 +86,42 @@ function addGenericNotification(notification) {
   });
 
   wrapper.insertBefore(notificationModal, wrapper.firstChild);
+}
+
+function setValidationErrorModal(errorJSONPromise) {
+  let wrapper = document.getElementById("wrapper");
+  let notificationModal = createNotificationModal("error");
+
+  notificationModal.appendChild(createNotificationModalExit());
+  notificationModal.appendChild(createNotificationModalTitle("Input Errors!"));
+
+  errorJSONPromise.then(errorJSON => {
+    for (const[errorFieldName, fieldErrorList] of Object.entries(errorJSON)) {
+      let newErrorSection = document.createElement("section");
+      let newErrorSectionLabel = document.createElement("p");
+      newErrorSectionLabel.innerText = errorFieldName;
+      newErrorSection.appendChild(newErrorSectionLabel);
+
+      let newErrorSectionList = document.createElement("ul");
+      newErrorSection.appendChild(newErrorSectionList);
+      fieldErrorList.forEach((elem) => {
+        let newErrorItem = document.createElement("li")
+        newErrorItem.innerText = elem;
+  
+        newErrorSectionList.appendChild(newErrorItem);
+      });
+  
+      notificationModal.appendChild(newErrorSection); 
+    }
+  });
+
+  wrapper.insertBefore(notificationModal, wrapper.firstChild);
+}
+
+function getAuthHeaderValue() {
+  let email = localStorage.getItem("email");
+  let password = localStorage.getItem("password");
+  let encodedBasicAuth = btoa(`${email}:${password}`);
+
+  return `Basic ${encodedBasicAuth}`;
 }

@@ -14,6 +14,10 @@ h2.form-title {
   color: #20c8ff;
 }
 
+h3.form-title {
+  color: #20c8ff;
+}
+
 .form-icon-container {
   width: auto;
   overflow: hidden;
@@ -28,6 +32,15 @@ h2.form-title {
 input {
   padding: 3px;
   border-radius: 6px;
+}
+
+textarea {
+  padding: 3px;
+  border-radius: 6px;
+}
+
+.textarea-label {
+  vertical-align: top;
 }
 
 .modal {
@@ -106,4 +119,49 @@ input {
   margin-left: 30px;
   font-size: .9em;
   list-style-type: circle;
+}
+
+nav {
+  width: 250px;
+  display: inline-block;
+  height: 100vh;
+  text-align: center;
+  padding: 5px;
+  background-color: #0d74f5;
+  color: white;
+  /* position: fixed;
+  top: 0;
+  left: 0; */
+}
+
+.nav-header {
+  margin-bottom: 20px;
+  font-size: 2em;
+}
+
+.nav-items p {
+  font-size: 1.3em;
+  margin: 15px auto 15px auto;
+  cursor: pointer;
+}
+
+.nav-items p:hover {
+  background-color: white;
+  color: black;
+}
+
+.nav-items a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.content {
+  display: inline-block;
+  width: 100%;
+  padding: 10px;
+
+}
+
+.wrapper-with-nav {
+  display: flex;
 }

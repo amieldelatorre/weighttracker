@@ -1,96 +1,79 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using System.Net;
 using WeightTracker.Authentication;
 using WeightTracker.Data;
 using WeightTracker.Models.User;
+using WeightTracker.Models.Weight;
 
 namespace WeightTracker.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class UserController : ControllerBase
+    public class WeightController : Controller
     {
-        private readonly ILogger<UserController> _logger;
+        private readonly ILogger<WeightController> _logger;
+        private readonly IWeightRepo _weightRepo;
         private readonly IUserRepo _userRepo;
         private readonly IAuthService _authService;
 
-        public UserController(ILogger<UserController> logger, IUserRepo userRepo, IAuthService authService)
+        public WeightController(ILogger<WeightController> logger, IWeightRepo weightRepo, IUserRepo userRepo, IAuthService authService)
         {
             _logger = logger;
+            _weightRepo = weightRepo;
             _userRepo = userRepo;
             _authService = authService;
         }
 
         [Authorize]
-        [HttpGet]
+        [HttpPost]
         [Produces("application/json")]
-        async public Task<ActionResult> GetUserFromCredentials()
+        async public Task<ActionResult> CreateWeight(WeightCreate weightCreateData)
         {
             try
             {
                 _logger.LogDebug("Retrieving user using Claims Identity");
-
                 User? user = await _userRepo.GetByEmail(_authService.GetEmailFromClaims());
                 // In reality, if you've made it this far the user should exist
-                if (user == null)
+                if (user == null) 
                     return NotFound();
-                UserOutput userOutput = new(user);
-                _logger.LogInformation("Retrieved user using Claims Identity");
 
-                return Ok(userOutput);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Failed to retrieve user: {ex.Message}");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Server is currently unable to handle your request");
-            }
-            
-        }
 
-        [HttpPost]
-        [Produces("application/json")]
-        async public Task<ActionResult> CreateUser(UserCreate userCreateData)
-        {
-            try
-            {
-                _logger.LogInformation("Creating new user.");
-                bool dataIsValid = await userCreateData.IsValid(_userRepo);
+                _logger.LogInformation("Creating a new weight");
+                bool dataIsValid = await weightCreateData.IsValid(_weightRepo, user.Id);
 
                 if (!dataIsValid)
                 {
-                    _logger.LogDebug("Create new user has invalid data.");
+                    _logger.LogDebug("Create new weight has invalid data");
                     return BadRequest(
                         new
                         {
-                            errors = userCreateData.GetErrors(),
+                            errors = weightCreateData.GetErrors(),
                             status = HttpStatusCode.BadRequest,
                             title = "One or more validation errors occurred."
                         }
                     );
                 }
 
-                User newUser = userCreateData.CreateUser();
-                bool add_success = await _userRepo.Add(newUser);
+                Weight newWeight = weightCreateData.CreateWeight(user.Id);
+                bool add_success = await _weightRepo.Add(newWeight);
 
-                if (!add_success)
+                if (!add_success) 
                 {
                     _logger.LogError("Failed to create user, database insert failure");
                     return StatusCode(StatusCodes.Status500InternalServerError, "Server is currently unable to handle your request");
                 }
 
-                UserOutput userOutput = new(newUser);
-                _logger.LogInformation("Successfully created a new user.");
+                WeightOutput weightOutput = new(newWeight);
+                _logger.LogInformation("Successfully created a new weight");
 
-                return CreatedAtAction(null, null, userOutput);
+                return CreatedAtAction(null, null, weightOutput);
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to create user: {ex.Message}");
+                _logger.LogError($"Failed to create weight: {ex.Message}");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Server is currently unable to handle your request");
             }
-            
         }
     }
 }

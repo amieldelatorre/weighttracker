@@ -1,5 +1,1 @@
-const API_URL = "https://localhost:44392";
-
-function myFunc() {
-  document.getElementById("test").innerText = API_URL;
-}
+const API_URL = "http://localhost:7070";

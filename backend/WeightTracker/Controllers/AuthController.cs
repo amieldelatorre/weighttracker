@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WeightTracker.Data;
-using WeightTracker.Models;
+using WeightTracker.Models.User;
 
 namespace WeightTracker.Controllers
 {

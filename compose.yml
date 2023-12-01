@@ -1,0 +1,74 @@
+version: '3'
+
+services:
+  # frontend:
+  #   image: nginx
+  #   container_name: frontend
+  #   restart: unless-stopped
+  #   ports: 
+  #     - 8080:80
+  #   networks:
+  #     - network-backend
+  #   volumes:
+  #     - ./frontend/html:/usr/share/nginx/html:ro
+  #     - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+  #   depends_on:
+  #     - backend
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    restart: unless-stopped
+    ports: 
+      - 8080:80
+    networks:
+      - network-backend
+    depends_on:
+      - backend
+
+  backend:
+    build: ./backend/WeightTracker
+    container_name: backend
+    restart: unless-stopped
+    ports:
+      - 7070:80
+    networks:
+      - network-db
+      - network-backend
+    environment:
+      - WeightTracker_ConnectionStrings__WebAPIDatabaseConnection=Host=192.168.0.110; Port=5432; Database=weighttracker; Username=root; Password=root
+    # depends_on:
+    #   - pg-db
+  
+  # pg-db:
+  #   image: postgres
+  #   container_name: postgres
+  #   restart: unless-stopped
+  #   networks:
+  #     - network-db
+  #   volumes:
+  #     - ./pg-data:/var/lib/postgresql/data
+  #   ports:
+  #     - 5432:5432
+  #   environment:
+  #     POSTGRES_USER: root
+  #     POSTGRES_PASSWORD: root
+
+  # pg-admin:
+  #   image: dpage/pgadmin4
+  #   container_name: pgadmin
+  #   restart: unless-stopped
+  #   networks:
+  #     - network-db
+  #   volumes:
+  #     - ./pgadmin-data:/var/lib/pgadmin
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: user-name@domain-name.com
+  #     PGADMIN_DEFAULT_PASSWORD: strong-password    
+
+networks:
+  network-backend:
+    external: false
+  network-db:
+    external: false    
+     

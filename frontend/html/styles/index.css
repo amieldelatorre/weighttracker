@@ -1,0 +1,29 @@
+.add-weight-form-fields {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+}
+
+.add-weight-form-container {
+  padding: 5px;
+  width: 70%;
+  max-width: 800px;
+  min-width: 800px;;
+  border-radius: 6px;
+  border: 1px black solid;
+  margin-left: 30px;
+  margin-top: 20px;
+}
+
+.add-weight-form input {
+  width: 100px;
+}
+
+.add-weight-form button[type=submit] {
+  border-radius: 6px;
+  display: block;
+  padding: 3px;
+  background-color: #20c8ff;
+  width: 60px;
+  max-height: 30px;
+}
