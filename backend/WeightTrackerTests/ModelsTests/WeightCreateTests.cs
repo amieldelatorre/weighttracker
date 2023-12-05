@@ -27,12 +27,15 @@ namespace WeightTrackerTests.ModelsTests
 
             bool validationResult = weightCreate.IsValid(_mockWeightRepo.Object, It.IsAny<int>()).GetAwaiter().GetResult();
             int numErrors = Helper.GetNumErrors(weightCreate.GetErrors());
-            Assert.That(validationResult, Is.EqualTo(expectedValidationResult));
-            Assert.That(numErrors, Is.EqualTo(expectedNumErrors));
+            Assert.Multiple(() =>
+            {
+                Assert.That(validationResult, Is.EqualTo(expectedValidationResult));
+                Assert.That(numErrors, Is.EqualTo(expectedNumErrors));
+            });
         }
 
         internal static object[] WeightCreateValidationTestProvider =
-        {
+        [
             new object[]
             {
                 new WeightCreate()
@@ -69,6 +72,6 @@ namespace WeightTrackerTests.ModelsTests
                 true,   // Expected result from validation
                 0,      // Number of Errors
             },
-        };
+        ];
     }
 }

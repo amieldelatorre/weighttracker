@@ -31,7 +31,7 @@ services:
     container_name: backend
     restart: unless-stopped
     ports:
-      - 7070:80
+      - 7070:8080
     networks:
       - network-db
       - network-backend

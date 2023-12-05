@@ -10,18 +10,11 @@ namespace WeightTracker.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class UserController : ControllerBase
+    public class UserController(ILogger<UserController> logger, IUserRepo userRepo, IAuthService authService) : ControllerBase
     {
-        private readonly ILogger<UserController> _logger;
-        private readonly IUserRepo _userRepo;
-        private readonly IAuthService _authService;
-
-        public UserController(ILogger<UserController> logger, IUserRepo userRepo, IAuthService authService)
-        {
-            _logger = logger;
-            _userRepo = userRepo;
-            _authService = authService;
-        }
+        private readonly ILogger<UserController> _logger = logger;
+        private readonly IUserRepo _userRepo = userRepo;
+        private readonly IAuthService _authService = authService;
 
         [Authorize]
         [HttpGet]

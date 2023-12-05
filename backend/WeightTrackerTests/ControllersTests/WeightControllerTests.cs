@@ -18,11 +18,11 @@ namespace WeightTrackerTests.ControllersTests
 {
     internal class WeightControllerTests
     {
-        private WeightController _weightController;
+        private readonly WeightController _weightController;
         private readonly Mock<IWeightRepo> _mockWeightRepo;
         private readonly Mock<IUserRepo> _mockUserRepo;
         private readonly Mock<IAuthService> _mockAuthService;
-        private ILogger<WeightController> _logger;
+        private readonly ILogger<WeightController> _logger;
 
         public WeightControllerTests()
         {
@@ -65,14 +65,18 @@ namespace WeightTrackerTests.ControllersTests
             _mockWeightRepo.Setup(repo => repo.Add(It.IsAny<Weight>())).Returns(Task.FromResult(createWeightResult));
 
             var result = _weightController.CreateWeight(weightCreate).GetAwaiter().GetResult();
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+#pragma warning disable CS8605 // Unboxing a possibly null value.
             int resultStatusCode = (int)result.GetType().GetProperty("StatusCode").GetValue(result, null);
+#pragma warning restore CS8605 // Unboxing a possibly null value.
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             Assert.That(resultStatusCode, Is.EqualTo(expectedStatusCode));
             
         }
 
         internal static object[] WeightControllerCreateWeightTestProvider =
-        {
+        [
             new object[]
             {
                 new WeightCreate()
@@ -151,6 +155,6 @@ namespace WeightTrackerTests.ControllersTests
                 true,  // Create weight result
                 201     // Expected status code
             },
-        };
+        ];
     }
 }

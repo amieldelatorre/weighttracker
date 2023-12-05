@@ -1,12 +1,8 @@
 ﻿namespace WeightTracker.Authentication
 {
-    public class AuthService : IAuthService
+    public class AuthService(IHttpContextAccessor contextAccessor) : IAuthService
     {
-        private readonly IHttpContextAccessor _contextAccessor;
-        public AuthService(IHttpContextAccessor contextAccessor) 
-        { 
-            _contextAccessor = contextAccessor;
-        }
+        private readonly IHttpContextAccessor _contextAccessor = contextAccessor;
 
         public string GetEmailFromClaims()
         {
@@ -15,7 +11,9 @@
             {
                 result = _contextAccessor.HttpContext.User?.Claims.First().Value;
             }
+#pragma warning disable CS8603 // Possible null reference return.
             return result;
+#pragma warning restore CS8603 // Possible null reference return.
         }
     }
 }

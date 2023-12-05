@@ -11,7 +11,7 @@ namespace WeightTrackerTests.ControllersTests
 {
     internal class UserControllerTests
     {
-        private UserController _userController;
+        private readonly UserController _userController;
         private readonly Mock<IUserRepo> _mockUserRepo;
         private readonly ILogger<UserController> _logger;
         private readonly Mock<IAuthService> _mockAuthService;
@@ -34,11 +34,13 @@ namespace WeightTrackerTests.ControllersTests
             if (result == null)
                 Assert.Fail("Null result when adding a new user");
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             Assert.That(result.StatusCode, Is.EqualTo(expectedStatusCode));
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
 
         internal static object[] UserControllerCreateUserTestProvider =
-        {
+        [
             new object[]
             {
                 new UserCreate()
@@ -119,6 +121,6 @@ namespace WeightTrackerTests.ControllersTests
                 true, // Create user result
                 201,   // Expected Status Code
             }
-        };
+        ];
     }
 }
