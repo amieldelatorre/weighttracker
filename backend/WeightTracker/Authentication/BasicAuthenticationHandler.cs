@@ -8,25 +8,21 @@ using WeightTracker.Data;
 
 namespace WeightTracker.Authentication
 {
-    public class BasicAuthenticationHandler: AuthenticationHandler<AuthenticationSchemeOptions>
+    public class BasicAuthenticationHandler(IUserRepo userRepo, IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder) : AuthenticationHandler<AuthenticationSchemeOptions>(options, logger, encoder)
     {
-        private readonly IUserRepo _userRepo;
-
-        public BasicAuthenticationHandler(IUserRepo userRepo, IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder,
-            ISystemClock clock) : base(options, logger, encoder, clock)
-        {
-            _userRepo = userRepo;
-        }
+        private readonly IUserRepo _userRepo = userRepo;
 
         async protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            if (!Request.Headers.ContainsKey("Authorization"))
+            if (!Request.Headers.TryGetValue("Authorization", out Microsoft.Extensions.Primitives.StringValues value))
             {
-                Response.Headers.Add("WWW-Authenticate", "Basic");
+                Response.Headers.Append("WWW-Authenticate", "Basic");
                 return AuthenticateResult.Fail("Authorization header not found");
             }
 
-            AuthenticationHeaderValue authHeader = AuthenticationHeaderValue.Parse(Request.Headers["Authorization"]);
+#pragma warning disable CS8604 // Possible null reference argument.
+            AuthenticationHeaderValue authHeader = AuthenticationHeaderValue.Parse(value);
+#pragma warning restore CS8604 // Possible null reference argument.
             if (authHeader.Parameter == null)
                 return AuthenticateResult.Fail("Authorization header found but is empty.");
             
@@ -43,7 +39,7 @@ namespace WeightTracker.Authentication
             {
                 var claims = new[] { new Claim("Email", email) };
                 ClaimsIdentity identity = new(claims, "Basic");
-                ClaimsPrincipal principal = new ClaimsPrincipal(identity);
+                ClaimsPrincipal principal = new(identity);
                 AuthenticationTicket ticket = new(principal, Scheme.Name);
                 return AuthenticateResult.Success(ticket);
             }

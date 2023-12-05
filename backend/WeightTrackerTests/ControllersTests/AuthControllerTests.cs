@@ -18,7 +18,7 @@ namespace WeightTrackerTests.ControllersTests
 {
     internal class AuthControllerTests
     {
-        private AuthController _authController;
+        private readonly AuthController _authController;
         private readonly Mock<IUserRepo> _mockUserRepo;
         private readonly ILogger<AuthController> _logger;
 
@@ -48,12 +48,16 @@ namespace WeightTrackerTests.ControllersTests
                 .Returns(Task.FromResult(isValidLogin));
 
             var result = _authController.Login(userLogin).GetAwaiter().GetResult();
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+#pragma warning disable CS8605 // Unboxing a possibly null value.
             int resultStatusCode = (int)result.GetType().GetProperty("StatusCode").GetValue(result, null);
+#pragma warning restore CS8605 // Unboxing a possibly null value.
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             Assert.That(resultStatusCode, Is.EqualTo(statusCode));
         }
 
         internal static object[] AuthControllerLoginTestProvider =
-        {
+        [
             new object[]
             {
                 false,  // isValidLogin
@@ -64,6 +68,6 @@ namespace WeightTrackerTests.ControllersTests
                 true,  // isValidLogin
                 200     // status code expected       
             }
-        };
+        ];
     }
 }

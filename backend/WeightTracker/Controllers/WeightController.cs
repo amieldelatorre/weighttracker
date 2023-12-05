@@ -10,20 +10,12 @@ namespace WeightTracker.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeightController : Controller
+    public class WeightController(ILogger<WeightController> logger, IWeightRepo weightRepo, IUserRepo userRepo, IAuthService authService) : Controller
     {
-        private readonly ILogger<WeightController> _logger;
-        private readonly IWeightRepo _weightRepo;
-        private readonly IUserRepo _userRepo;
-        private readonly IAuthService _authService;
-
-        public WeightController(ILogger<WeightController> logger, IWeightRepo weightRepo, IUserRepo userRepo, IAuthService authService)
-        {
-            _logger = logger;
-            _weightRepo = weightRepo;
-            _userRepo = userRepo;
-            _authService = authService;
-        }
+        private readonly ILogger<WeightController> _logger = logger;
+        private readonly IWeightRepo _weightRepo = weightRepo;
+        private readonly IUserRepo _userRepo = userRepo;
+        private readonly IAuthService _authService = authService;
 
         [Authorize]
         [HttpPost]
