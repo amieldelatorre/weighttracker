@@ -1,10 +1,9 @@
-name: dotnet build
+name: Build and test
 
 on: ["push", "pull_request"]
 
 jobs:
-  build:
-
+  build-and-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -12,19 +11,45 @@ jobs:
     env:
       working-directory: ./backend/WeightTracker
     
-
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Run tests for backend
       - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
+
       - name: Install dependencies
         run: dotnet restore
         working-directory: ${{ env.working-directory }}
+
       - name: Build
         run: dotnet build --configuration Release --no-restore
         working-directory: ${{ env.working-directory }}
+
       - name: Test
         run: dotnet test --no-restore --verbosity normal
         working-directory: ${{ env.working-directory }}
+      
+      # Test building of docker image
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Build Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          platforms: linux/amd64,linux/arm64
+          push: false
+
+      - name: Build Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/WeightTracker
+          platforms: linux/amd64,linux/arm64
+          push: false
