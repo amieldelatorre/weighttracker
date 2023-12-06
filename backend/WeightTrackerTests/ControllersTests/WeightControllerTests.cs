@@ -23,6 +23,18 @@ namespace WeightTrackerTests.ControllersTests
         private readonly Mock<IUserRepo> _mockUserRepo;
         private readonly Mock<IAuthService> _mockAuthService;
         private readonly ILogger<WeightController> _logger;
+        private readonly User _testUser = new() {
+            Id = 1,
+            FirstName = "FirstName",
+            LastName = "LastName",
+            Email = "email@example.com",
+            Password = "password",
+            DateOfBirth = DateOnly.FromDateTime(DateTime.Now),
+            Gender = WeightTracker.Enums.GenderEnum.MALE,
+            Height = 165,
+            DateCreated = DateTime.Now,
+            DateModified = DateTime.Now
+        };
 
         public WeightControllerTests()
         {
@@ -42,25 +54,11 @@ namespace WeightTrackerTests.ControllersTests
         [Test, TestCaseSource(nameof(WeightControllerCreateWeightTestProvider))]
         public void CreateWeightTest(WeightCreate weightCreate, bool emailFound, bool weightExistsForUserAndDate, bool createWeightResult, int expectedStatusCode)
         {
-            User testUser = new()
-            {
-                Id = 1,
-                FirstName = "FirstName",
-                LastName = "LastName",
-                Email = "email@example.com",
-                Password = "password",
-                DateOfBirth = DateOnly.FromDateTime(DateTime.Now),
-                Gender = WeightTracker.Enums.GenderEnum.MALE,
-                Height = 165,
-                DateCreated = DateTime.Now,
-                DateModified = DateTime.Now
-            };
-
-            _mockAuthService.Setup(service => service.GetEmailFromClaims()).Returns(testUser.Email);
+            _mockAuthService.Setup(service => service.GetEmailFromClaims()).Returns(_testUser.Email);
             if (!emailFound)
                 _mockUserRepo.Setup(repo => repo.GetByEmail(It.IsAny<string>())).Returns(Task.FromResult<User?>(null));
             else
-                _mockUserRepo.Setup(repo => repo.GetByEmail(It.IsAny<string>())).Returns(Task.FromResult<User?>(testUser));
+                _mockUserRepo.Setup(repo => repo.GetByEmail(It.IsAny<string>())).Returns(Task.FromResult<User?>(_testUser));
             _mockWeightRepo.Setup(repo => repo.WeightExistsForUserIdAndDate(It.IsAny<int>(), It.IsAny<DateOnly>())).Returns(Task.FromResult(weightExistsForUserAndDate));
             _mockWeightRepo.Setup(repo => repo.Add(It.IsAny<Weight>())).Returns(Task.FromResult(createWeightResult));
 
@@ -74,6 +72,66 @@ namespace WeightTrackerTests.ControllersTests
             Assert.That(resultStatusCode, Is.EqualTo(expectedStatusCode));
             
         }
+
+        [Test, TestCaseSource(nameof(WeightControllerGetWeightbyIdTestProvider))]
+        public void GetWeightByIdTest(bool emailFound, bool weightFound, int expectedStatusCode)
+        {
+            Weight weightTest = new()
+            {
+                Id = 1,
+                UserId = 1,
+                UserWeight = 50,
+                DateCreated = DateTime.UtcNow,
+                DateModified = DateTime.UtcNow,
+            };
+
+            _mockAuthService.Setup(service => service.GetEmailFromClaims()).Returns(_testUser.Email);
+            if (!emailFound)
+            {
+                _mockUserRepo.Setup(repo => repo.GetByEmail(It.IsAny<string>())).Returns(Task.FromResult<User?>(null));
+                var result = _weightController.GetWeightById(weightTest.Id).GetAwaiter().GetResult();
+                int resultStatusCode = (int)result.GetType().GetProperty("StatusCode").GetValue(result, null);
+                Assert.That(resultStatusCode, Is.EqualTo(expectedStatusCode));
+            }
+            else
+                _mockUserRepo.Setup(repo => repo.GetByEmail(It.IsAny<string>())).Returns(Task.FromResult<User?>(_testUser));
+
+            if (!weightFound)
+            {
+                _mockWeightRepo.Setup(repo => repo.GetById(It.IsAny<int>(), It.IsAny<int>())).Returns(Task.FromResult<Weight?>(null));
+                var result = _weightController.GetWeightById(weightTest.Id).GetAwaiter().GetResult();
+                int resultStatusCode = (int)result.GetType().GetProperty("StatusCode").GetValue(result, null);
+                Assert.That(resultStatusCode, Is.EqualTo(expectedStatusCode));
+            }
+            else
+            {
+                _mockWeightRepo.Setup(repo => repo.GetById(It.IsAny<int>(), It.IsAny<int>())).Returns(Task.FromResult<Weight?>(weightTest));
+                var result = _weightController.GetWeightById(weightTest.Id).GetAwaiter().GetResult();
+                int resultStatusCode = (int)result.GetType().GetProperty("StatusCode").GetValue(result, null);
+                Assert.That(resultStatusCode, Is.EqualTo(expectedStatusCode));
+            }
+        }
+
+        internal static object[] WeightControllerGetWeightbyIdTestProvider = [
+            new object[]
+            {
+                false,  // If the User is found with the email provided
+                false,  // If the weight is found with the id provided
+                404     // Expected status code
+            },
+            new object[]
+            {
+                true,  // If the User is found with the email provided
+                false,  // If the weight is found with the id provided
+                404     // Expected status code
+            },
+            new object[]
+            {
+                true,  // If the User is found with the email provided
+                true,  // If the weight is found with the id provided
+                200     // Expected status code
+            }
+        ];
 
         internal static object[] WeightControllerCreateWeightTestProvider =
         [

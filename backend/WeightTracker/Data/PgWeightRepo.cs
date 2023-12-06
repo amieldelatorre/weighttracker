@@ -24,5 +24,11 @@ namespace WeightTracker.Data
             Weight? weight = await _context.Weights.SingleOrDefaultAsync(weight => (weight.UserId == userId && weight.Date == date));
             return weight != null;
         }
+
+        async public Task<Weight?> GetById(int userId, int weightId)
+        {
+            Weight? weight = await _context.Weights.SingleOrDefaultAsync(weight => weight.UserId == userId && weight.Id == weightId);
+            return weight;
+        }
     }
 }

@@ -6,5 +6,6 @@ namespace WeightTracker.Data
     {
         Task<bool> Add(Weight weight);
         Task<bool> WeightExistsForUserIdAndDate(int userId, DateOnly date);
+        Task<Weight?> GetById(int userId, int weightId);
     }
 }
