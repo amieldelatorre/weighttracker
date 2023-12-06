@@ -1,0 +1,47 @@
+name: New Tag Created
+
+on:
+  push:
+    tags:
+      - '**'
+
+jobs:
+  build-and-test:
+    uses: ./github/workflows/build.yml
+
+  push:
+    needs: [build-and-test]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker QEMU Emulation
+        uses: docker/setup-qemu-action@v3
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+        
+      - name: Docker Build Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: amieldelatorre/weighttracker-frontend:${{  github.ref_name }},amieldelatorre/weighttracker-frontend:latest
+
+      - name: Docker Build Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/WeightTracker
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: amieldelatorre/weighttracker-backend:${{  github.ref_name }},amieldelatorre/weighttracker-backend:latest
+    
