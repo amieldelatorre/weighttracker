@@ -30,5 +30,11 @@ namespace WeightTracker.Data
             Weight? weight = await _context.Weights.SingleOrDefaultAsync(weight => weight.UserId == userId && weight.Id == weightId);
             return weight;
         }
+
+        public IQueryable<Weight> GetAllByUserId(int userId)
+        {
+            IQueryable<Weight> weights = _context.Weights.Where(weight => weight.UserId == userId);
+            return weights;
+        }
     }
 }
