@@ -16,6 +16,7 @@ namespace WeightTracker.Models.Weight
         public required double UserWeight { get; set; }
         [Column(TypeName = "text")]
         public string? Description {  get; set; }
+        [Required]
         [Column(TypeName = "date")]
         public DateOnly Date {  get; set; }
         [Required]
