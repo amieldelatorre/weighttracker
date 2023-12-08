@@ -18,7 +18,7 @@ namespace WeightTracker.Models.Weight
         public string? Description {  get; set; }
         [Required]
         [Column(TypeName = "date")]
-        public DateOnly Date {  get; set; }
+        public required DateOnly Date {  get; set; }
         [Required]
         [Column(TypeName = "timestamp with time zone")]
         public required DateTime DateCreated { get; set; }

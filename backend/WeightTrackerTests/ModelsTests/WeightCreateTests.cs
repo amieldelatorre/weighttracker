@@ -7,25 +7,66 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WeightTracker.Data;
+using WeightTracker.Enums;
+using WeightTracker.Models.User;
 using WeightTracker.Models.Weight;
 
 namespace WeightTrackerTests.ModelsTests
 {
     internal class WeightCreateTests
     {
-        private readonly Mock<IWeightRepo> _mockWeightRepo;
+        private readonly IWeightRepo _weightRepo;
+        private readonly WeightTrackerDbContext _context;
+        private readonly User _existingUser;
+
         public WeightCreateTests()
         {
-            _mockWeightRepo = new Mock<IWeightRepo>();
+            SQLiteContext sQLiteContext = new();
+            _context = sQLiteContext.CreateSQLiteContext();
+            _weightRepo = new PgWeightRepo(_context);
+            _existingUser = new User()
+            {
+                FirstName = "James",
+                LastName = "Smith",
+                Email = "james.smith@example.com",
+                Password = "password",
+                DateOfBirth = DateOnly.FromDateTime(DateTime.Now.AddDays(-9132)),
+                Gender = GenderEnum.MALE,
+                Height = 165,
+                DateCreated = DateTime.Now,
+                DateModified = DateTime.Now
+            };
+        }
+
+        [OneTimeSetUp]
+        public void TestSetUp()
+        {
+            _context.AddRange(_existingUser);
+
+            _context.AddRange(
+                new Weight()
+                {
+                    UserId = 1,
+                    UserWeight = 50,
+                    Date = DateOnly.FromDateTime(DateTime.Now),
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now
+                }
+            );
+
+            _context.SaveChanges();
+        }
+
+        [OneTimeTearDown]
+        public void TestTearDown()
+        {
+            _context.Dispose();
         }
 
         [Test, TestCaseSource(nameof(WeightCreateValidationTestProvider))]
-        public void WeightCreateValidationTest(WeightCreate weightCreate, bool weightExistsForUserIdAndDate, bool expectedValidationResult, int expectedNumErrors)
+        public void WeightCreateValidationTest(WeightCreate weightCreate, bool expectedValidationResult, int expectedNumErrors)
         {
-            // Setup check for if the weight already exists f or user id and date combination
-            _mockWeightRepo.Setup(repo => repo.WeightExistsForUserIdAndDate(It.IsAny<int>(), It.IsAny<DateOnly>())).Returns(Task.FromResult(weightExistsForUserIdAndDate));
-
-            bool validationResult = weightCreate.IsValid(_mockWeightRepo.Object, It.IsAny<int>()).GetAwaiter().GetResult();
+            bool validationResult = weightCreate.IsValid(_weightRepo, _existingUser.Id).GetAwaiter().GetResult();
             int numErrors = Helper.GetNumErrors(weightCreate.GetErrors());
             Assert.Multiple(() =>
             {
@@ -38,37 +79,46 @@ namespace WeightTrackerTests.ModelsTests
         [
             new object[]
             {
+                /*
+                 * Test for a weight create input that has the following error(s):
+                 *      - Weight is less than or equal to 0
+                 *      - Date and UserId combination already exists
+                 */
                 new WeightCreate()
                 {
                     UserWeight = 0,
                     Date = DateOnly.FromDateTime(DateTime.Now),
                     Description = "something"
                 },
-                true,   // Weight already exists for user id and date combination
                 false,  // Expected result from validation
                 2,      // Number of Errors
             },
             new object[]
             {
+                /*
+                 * Test for a weight create input that has the following error(s):
+                 *      - Date is greater than today's date
+                 */
                 new WeightCreate()
                 {
-                    UserWeight = 0,
+                    UserWeight = 72,
                     Date = DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
                     Description = "something"
                 },
-                true,   // Weight already exists for user id and date combination
                 false,  // Expected result from validation
-                3,      // Number of Errors
+                1,      // Number of Errors
             },
             new object[]
             {
+                /*
+                 * Test for a weight create input that succeeds
+                 */
                 new WeightCreate()
                 {
-                    UserWeight = 154.8,
+                    UserWeight = 72,
                     Date = DateOnly.FromDateTime(DateTime.Now.AddDays(-10)),
                     Description = "something"
                 },
-                false,  // Weight already exists for user id and date combination
                 true,   // Expected result from validation
                 0,      // Number of Errors
             },

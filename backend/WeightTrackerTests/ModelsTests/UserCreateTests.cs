@@ -123,7 +123,7 @@ namespace WeightTrackerTests.ModelsTests
             new object[]
             {
                 /*
-                 * Test for a user create input that succeeds:
+                 * Test for a user create input that succeeds
                  */
                 new UserCreate()
                 {
