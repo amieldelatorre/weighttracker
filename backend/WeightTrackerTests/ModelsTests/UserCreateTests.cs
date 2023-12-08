@@ -8,30 +8,67 @@ namespace WeightTrackerTests.ModelsTests
 {
     public class UserCreateTests
     {
-        private readonly Mock<IUserRepo> _mockUserRepo;
-        private readonly ILogger<UserCreateTests> _logger;
+        private readonly IUserRepo _userRepo;
+        private readonly WeightTrackerDbContext _context;
         public UserCreateTests()
         {
-            _mockUserRepo = new Mock<IUserRepo>();
-            _logger = Mock.Of<ILogger<UserCreateTests>>();
+            SQLiteContext sQLiteContext = new();
+            _context = sQLiteContext.CreateSQLiteContext();
+            _userRepo = new PgUserRepo(_context);
+        }
+
+        [OneTimeSetUp]
+        public void TestSetUp()
+        {
+            _context.AddRange(
+                new User() 
+                { 
+                    FirstName = "James",
+                    LastName = "Smith",
+                    Email = "james.smith@example.com",
+                    Password = "password",
+                    DateOfBirth = DateOnly.FromDateTime(DateTime.Now.AddDays(-9132)),
+                    Gender = GenderEnum.MALE,
+                    Height = 165,
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now
+                }
+            );
+
+            _context.SaveChanges();
+        }
+
+        [OneTimeTearDown]
+        public void TestTearDown()
+        {
+            _context.Dispose();
         }
 
         [Test, TestCaseSource(nameof(UserCreateValidationTestProvider))]
-        public void UserCreateValidationTest(UserCreate user, bool emailExists , bool expectedValidationResult, int expectedNumErrors)
+        public void UserCreateValidationTest(UserCreate user, bool expectedValidationResult, int expectedNumErrors)
         {
-            // Setup check for email exists according to parameter
-            _mockUserRepo.Setup(repo => repo.EmailExists(user.Email)).Returns(Task.FromResult(emailExists));
-
-            bool validationResult = user.IsValid(_mockUserRepo.Object).GetAwaiter().GetResult();
+            bool validationResult = user.IsValid(_userRepo).GetAwaiter().GetResult();
             int numErrors = Helper.GetNumErrors(user.GetErrors());
-            Assert.That(validationResult, Is.EqualTo(expectedValidationResult));
-            Assert.That(numErrors, Is.EqualTo(expectedNumErrors));
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(validationResult, Is.EqualTo(expectedValidationResult));
+                Assert.That(numErrors, Is.EqualTo(expectedNumErrors));
+            });
         }
 
         internal static object[] UserCreateValidationTestProvider =
         {
             new object[]
             {
+                /*
+                 * Test for a user create input that has the following error(s):
+                 *      - Null or empty FirstName, LastName, Email
+                 *      - Password that does not meet the minimum length of 8
+                 *      - Date of Birth greater than today's date
+                 *      - A Gender that does not fit in the GenderEnum
+                 *      - A Height that is less than 0
+                 */
                 new UserCreate()
                 {
                     FirstName = "",
@@ -42,55 +79,62 @@ namespace WeightTrackerTests.ModelsTests
                     Gender = (GenderEnum)3,
                     Height = -1
                 },
-                false, // Email doesn't exist
                 false, // Expected result from validation
                 7      // Number of Errors
             },
             new object[]
             {
+                /*
+                 * Test for a user create input that has the following error(s):
+                 *      - Password that does not meet the minimum length of 8
+                 */
                 new UserCreate()
                 {
-                    FirstName = "abc",
-                    LastName = "def",
-                    Email = "asd",
+                    FirstName = "James",
+                    LastName = "Smith",
+                    Email = "james.smith2@example.com",
                     DateOfBirth = DateOnly.FromDateTime(DateTime.Now.AddDays(-365)),
                     Password = "abcd123",
                     Gender = GenderEnum.MALE,
                     Height = 150
                 },
-                false, // Email doesn't exist
                 false, // Expected result from validation
                 1      // Number of Errors
             },
             new object[]
             {
+                /*
+                 * Test for a user create input that has the following error(s):
+                 *      - Email already exists
+                 */
                 new UserCreate()
                 {
-                    FirstName = "abc",
-                    LastName = "def",
-                    Email = "asd",
+                    FirstName = "James",
+                    LastName = "Smith",
+                    Email = "james.smith@example.com",
                     DateOfBirth = DateOnly.FromDateTime(DateTime.Now.AddDays(-365)),
                     Password = "abcd1234",
                     Gender = GenderEnum.MALE,
                     Height = 150
                 },
-                true,  // Email exists
                 false, // Expected result from validation
                 1      // Number of Errors
             },
             new object[]
             {
+                /*
+                 * Test for a user create input that succeeds:
+                 */
                 new UserCreate()
                 {
-                    FirstName = "abc",
-                    LastName = "def",
-                    Email = "asd",
+                    FirstName = "James",
+                    LastName = "Smith",
+                    Email = "james.smith2@example.com",
                     DateOfBirth = DateOnly.FromDateTime(DateTime.Now.AddDays(-365)),
                     Password = "abcd1234",
                     Gender = GenderEnum.MALE,
                     Height = 150
                 },
-                false,  // Email doesn't exists
                 true,  // Expected result from validation
                 0      // Number of Errors
             }
