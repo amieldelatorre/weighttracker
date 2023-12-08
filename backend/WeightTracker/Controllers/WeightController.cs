@@ -52,7 +52,7 @@ namespace WeightTracker.Controllers
         [Authorize]
         [HttpGet]
         [Produces("application/json")]
-        async public Task<ActionResult> GetWeights([FromQuery] GetWeightsQueryParameters queryParameters)
+        async public Task<ActionResult<PaginatedResult<Weight>>> GetWeights([FromQuery] GetWeightsQueryParameters queryParameters)
         {
             try
             {
@@ -72,7 +72,7 @@ namespace WeightTracker.Controllers
                     if (queryParameters.DateFrom != null)
                         nextPath += $"&datefrom={queryParameters.DateFrom}";
                     if (queryParameters.DateTo != null)
-                        nextPath += $"dateto={queryParameters.DateTo}";
+                        nextPath += $"&dateto={queryParameters.DateTo}";
                 }
 
                 PaginatedResult<Weight> result = new()
