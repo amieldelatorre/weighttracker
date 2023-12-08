@@ -3,11 +3,11 @@ using WeightTracker.Models.Weight;
 
 namespace WeightTracker.Data
 {
-    public class PgWeightRepo : IWeightRepo
+    public class WeightRepo : IWeightRepo
     {
         private readonly WeightTrackerDbContext _context;
 
-        public PgWeightRepo(WeightTrackerDbContext context)
+        public WeightRepo(WeightTrackerDbContext context)
         {
             _context = context;
         }

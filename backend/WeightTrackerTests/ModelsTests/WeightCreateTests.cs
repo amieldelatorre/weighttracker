@@ -23,7 +23,7 @@ namespace WeightTrackerTests.ModelsTests
         {
             SQLiteContext sQLiteContext = new();
             _context = sQLiteContext.CreateSQLiteContext();
-            _weightRepo = new PgWeightRepo(_context);
+            _weightRepo = new WeightRepo(_context);
             _existingUser = new User()
             {
                 FirstName = "James",

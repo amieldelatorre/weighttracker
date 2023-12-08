@@ -14,7 +14,7 @@ namespace WeightTrackerTests.ModelsTests
         {
             SQLiteContext sQLiteContext = new();
             _context = sQLiteContext.CreateSQLiteContext();
-            _userRepo = new PgUserRepo(_context);
+            _userRepo = new UserRepo(_context);
         }
 
         [OneTimeSetUp]

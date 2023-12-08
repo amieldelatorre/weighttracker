@@ -3,11 +3,11 @@ using WeightTracker.Models.User;
 
 namespace WeightTracker.Data
 {
-    public class PgUserRepo: IUserRepo
+    public class UserRepo: IUserRepo
     {
         private readonly WeightTrackerDbContext _context;
 
-        public PgUserRepo( WeightTrackerDbContext context)
+        public UserRepo( WeightTrackerDbContext context)
         {
             _context = context;
         }

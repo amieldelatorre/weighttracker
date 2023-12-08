@@ -23,8 +23,8 @@ builder.Services.AddDbContext<WeightTrackerDbContext>(
     options => options.UseNpgsql(ConfigurationExtensions.GetConnectionString(builder.Configuration, "WebAPIDatabaseConnection"))
     //options => options.UseNpgsql(builder.Configuration.GetConnectionString("WebAPIDatabaseConnection"))
 );
-builder.Services.AddScoped<IUserRepo, PgUserRepo>();
-builder.Services.AddScoped<IWeightRepo, PgWeightRepo>(); 
+builder.Services.AddScoped<IUserRepo, UserRepo>();
+builder.Services.AddScoped<IWeightRepo, WeightRepo>(); 
 
 builder.Services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("BasicAuthentication", null);
 

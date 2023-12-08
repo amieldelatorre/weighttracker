@@ -22,7 +22,7 @@ namespace WeightTrackerTests.ControllersTests
         {
             SQLiteContext sQLiteContext = new();
             _context = sQLiteContext.CreateSQLiteContext();
-            _userRepo = new PgUserRepo(_context);
+            _userRepo = new UserRepo(_context);
             _logger = Mock.Of<ILogger<UserController>>();
             _mockAuthService = new Mock<IAuthService>();
 
