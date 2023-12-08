@@ -70,9 +70,9 @@ namespace WeightTracker.Controllers
                 {
                     nextPath = $"{Request.Path.Value}?limit={queryParameters.Limit}&offset={queryParameters.Limit + queryParameters.Offset}";
                     if (queryParameters.DateFrom != null)
-                        nextPath += $"&datefrom={queryParameters.DateFrom}";
+                        nextPath += $"&datefrom={queryParameters.DateFrom?.ToString("dd/MM/yyyy")}";
                     if (queryParameters.DateTo != null)
-                        nextPath += $"&dateto={queryParameters.DateTo}";
+                        nextPath += $"&dateto={queryParameters.DateTo?.ToString("dd/MM/yyyy")}";
                 }
 
                 PaginatedResult<Weight> result = new()
