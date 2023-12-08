@@ -76,15 +76,23 @@ namespace WeightTrackerTests.ControllersTests
         [
             new object[]
             {
+                /*
+                 * Test for a user login that has the following error(s):
+                 *      - Email and password is don't exist
+                 */
                 new UserLogin()
                 {
                     Email = "email@email.com",
-                    Password = "password"
+                    Password = "passasdfasword1"
                 },
                 401     // status code expected       
             },
             new object[]
             {
+                /*
+                 * Test for a user login that has the following error(s):
+                 *      - Email is correct but password 1 character wrong
+                 */
                 new UserLogin()
                 {
                     Email = "james.smith@example.com",
@@ -94,6 +102,10 @@ namespace WeightTrackerTests.ControllersTests
             },
             new object[]
             {
+                /*
+                 * Test for a user login that has the following error(s):
+                 *      - Email is 1 character wrong but password is correct
+                 */
                 new UserLogin()
                 {
                     Email = "james.smith1@example.com",
@@ -103,6 +115,9 @@ namespace WeightTrackerTests.ControllersTests
             },
             new object[]
             {
+                /*
+                 * Test for a user login that succeeds
+                 */
                 new UserLogin()
                 {
                     Email = "james.smith@example.com",
