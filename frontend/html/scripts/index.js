@@ -82,9 +82,113 @@ function handleAddWeightFormSubmit() {
   });
 }
 
+
+async function getWeightData(limit=100, offset=0, dateFrom, dateTo) {
+  let params = new URLSearchParams({
+    limit: limit,
+    offset: offset
+  });
+  if (typeof dateFrom !== "undefined" ) {
+    params.append("dateFrom", dateFrom)
+  }
+  if (typeof dateTo !== "undefined" ) {
+    params.append("dateTo", dateTo)
+  }
+
+  let url = `${API_URL}/Weight?` + params;
+  weightData = await fetch(URL=url, {
+    method: "GET",
+    cors: "no-cors",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": getAuthHeaderValue()
+    }
+  }).then(response => {
+    if (response.ok) {
+      return response.json()
+    } else {
+      if (response.status === 400) {
+        clearNotification();
+
+          let notification = {
+            type: "error",
+            title: "Unexpected issue with retrieving weight data 😞",
+            messages: [
+              "Please try again later and if problem persists, please contact the administrator."
+            ]
+          };
+          addGenericNotification(notification);
+      } else if (response.status === 401) {
+        clearCredentialsAndRedirect();
+      } else {
+        clearNotification();
+
+          let notification = {
+            type: "error",
+            title: "Unable to reach server 😞",
+            messages: [
+              "Please try again later and if problem persists, please contact the administrator."
+            ]
+          };
+          addGenericNotification(notification);
+      }
+    }
+  }).catch(error => {
+    clearNotification();
+
+      let notification = {
+        type: "error",
+        title: "Unable to reach server 😞",
+        messages: [
+          "Please try again later and if problem persists, please contact the administrator."
+        ]
+      };
+      addGenericNotification(notification);
+  });
+
+  return weightData;
+}
+
+
+async function createChart(limit=30, offset=0, dateFrom, dateTo) {
+  weightData = await getWeightData(limit=limit, offset=offset, dateFrom=dateFrom, dateTo=dateTo);
+
+  ascendingWeightDataResults = weightData.results.reverse();
+  
+  new Chart(
+    document.getElementById('chart').getContext('2d'),
+    {
+      type: 'line',
+      data: {
+        labels: ascendingWeightDataResults.map(row => row.date),
+        datasets: [
+          {
+            label: `Weight the past ${limit} days`,
+            data: ascendingWeightDataResults.map(row => row.userWeight),
+            fill: false,
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1
+          }
+        ]
+      }
+    }
+  );
+}
+
 window.addEventListener("load", async () => {
   handleSignOut();
   handleAddWeightFormSubmit();
+
+  dateTo = new Date();
+  dateFrom = new Date();
+  dateFrom.setDate(dateTo.getDate() - 30)
+
+  createChart(
+    limit=30,
+    offset=0,
+    dateFrom=dateFrom.toISOString().split('T')[0],
+    dateTo=dateTo.toISOString().split('T')[0]
+  );
 });
 
 // Do this straight away
