@@ -88,10 +88,10 @@ async function getWeightData(limit=100, offset=0, dateFrom, dateTo) {
     limit: limit,
     offset: offset
   });
-  if (typeof dateFrom !== "undefined" ) {
+  if (dateFrom !== undefined ) {
     params.append("dateFrom", dateFrom)
   }
-  if (typeof dateTo !== "undefined" ) {
+  if (dateTo !== undefined ) {
     params.append("dateTo", dateTo)
   }
 
@@ -150,17 +150,17 @@ async function getWeightData(limit=100, offset=0, dateFrom, dateTo) {
 }
 
 
-async function createChart(weightData) {
+function createChart(weightDataResults) {
   new Chart(
     document.getElementById('chart').getContext('2d'),
     {
       type: 'line',
       data: {
-        labels: weightData.map(row => row.date),
+        labels: weightDataResults.map(row => row.date),
         datasets: [
           {
             label: `Weight the past ${limit} days`,
-            data: weightData.map(row => row.userWeight),
+            data: weightDataResults.map(row => row.userWeight),
             fill: false,
             borderColor: 'rgb(75, 192, 192)',
             tension: 0.1
@@ -171,11 +171,65 @@ async function createChart(weightData) {
   );
 }
 
+function removeChildElements(parentElement) {
+  while (parentElement.lastChild) {
+    parentElement.removeChild(parentElement.lastChild)
+  }
+}
+
+function getTableHeaderElement() {
+  let tableHeaderElementRow = document.createElement("tr");
+  tableHeaderElementRow.classList.add("weight-table-header-row");
+
+  const headers = ["Date", "Weight", "Description"];
+  headers.forEach(header => {
+    let childTableHeader = document.createElement("th");
+    childTableHeader.innerText = header;
+    tableHeaderElementRow.appendChild(childTableHeader);
+  });
+
+  return tableHeaderElementRow;
+}
+
+function getTableRow(entry) {
+  let tableRow = document.createElement("tr");
+
+  let dateData = document.createElement("td");
+  dateData.innerText = entry.date;
+
+  let weightData = document.createElement("td");
+  weightData.innerText = parseFloat(entry.userWeight).toFixed(2);
+
+  let descriptionData = document.createElement("td");
+  descriptionData.innerText = document.description !== undefined ? document.description : "";
+
+  tableRow.appendChild(dateData);
+  tableRow.appendChild(weightData);
+  tableRow.appendChild(descriptionData);
+
+  return tableRow;
+}
+
+function createTable(weightData) {
+  const table = document.getElementById("weight-table");
+  removeChildElements(table);
+  const tableHeaderRow = getTableHeaderElement();
+  table.appendChild(tableHeaderRow);
+  
+  weightData.results.reverse().forEach(entry => {
+    table.appendChild(getTableRow(entry));
+  });
+}
+
 window.addEventListener("load", async () => {
   handleSignOut();
   handleAddWeightFormSubmit();
   createChart((await data).results.reverse());
+  createTable(await data);
 });
+ 
+// Do this straight away
+checkLoggedIn();
 
 let dateTo = new Date();
 let dateFrom = new Date();
@@ -187,7 +241,5 @@ let data = getWeightData(
   dateFrom=dateFrom.toISOString().split('T')[0], 
   dateTo=dateTo.toISOString().split('T')[0]
 );
- 
 
-// Do this straight away
-checkLoggedIn();
+console.log(data)
