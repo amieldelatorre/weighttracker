@@ -150,21 +150,17 @@ async function getWeightData(limit=100, offset=0, dateFrom, dateTo) {
 }
 
 
-async function createChart(limit=30, offset=0, dateFrom, dateTo) {
-  weightData = await getWeightData(limit=limit, offset=offset, dateFrom=dateFrom, dateTo=dateTo);
-
-  ascendingWeightDataResults = weightData.results.reverse();
-  
+async function createChart(weightData) {
   new Chart(
     document.getElementById('chart').getContext('2d'),
     {
       type: 'line',
       data: {
-        labels: ascendingWeightDataResults.map(row => row.date),
+        labels: weightData.map(row => row.date),
         datasets: [
           {
             label: `Weight the past ${limit} days`,
-            data: ascendingWeightDataResults.map(row => row.userWeight),
+            data: weightData.map(row => row.userWeight),
             fill: false,
             borderColor: 'rgb(75, 192, 192)',
             tension: 0.1
@@ -178,18 +174,20 @@ async function createChart(limit=30, offset=0, dateFrom, dateTo) {
 window.addEventListener("load", async () => {
   handleSignOut();
   handleAddWeightFormSubmit();
-
-  dateTo = new Date();
-  dateFrom = new Date();
-  dateFrom.setDate(dateTo.getDate() - 30)
-
-  createChart(
-    limit=30,
-    offset=0,
-    dateFrom=dateFrom.toISOString().split('T')[0],
-    dateTo=dateTo.toISOString().split('T')[0]
-  );
+  createChart((await data).results.reverse());
 });
+
+let dateTo = new Date();
+let dateFrom = new Date();
+dateFrom.setDate(dateTo.getDate() - 30)
+
+let data = getWeightData(
+  limit=30, 
+  offset=0, 
+  dateFrom=dateFrom.toISOString().split('T')[0], 
+  dateTo=dateTo.toISOString().split('T')[0]
+);
+ 
 
 // Do this straight away
 checkLoggedIn();
