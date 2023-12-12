@@ -395,7 +395,7 @@ namespace WeightTrackerTests.ControllersTests
                 200,     // Expected status code
                 3,       // Expected Limit
                 0,       // Expected Offset
-                $"/Weight?limit=3&offset=3&datefrom={DateOnly.FromDateTime(DateTime.Now.AddDays(-9)).ToString("dd/MM/yyyy")}&dateto={DateOnly.FromDateTime(DateTime.Now.AddDays(-1)).ToString("dd/MM/yyyy")}"     // Expected Next value
+                $"/Weight?limit=3&offset=3&datefrom={DateOnly.FromDateTime(DateTime.Now.AddDays(-9)).ToString("yyyy/MM/dd")}&dateto={DateOnly.FromDateTime(DateTime.Now.AddDays(-1)).ToString("yyyy/MM/dd")}"     // Expected Next value
             },
             new object[]
             {
@@ -413,7 +413,7 @@ namespace WeightTrackerTests.ControllersTests
                 200,     // Expected status code
                 3,       // Expected Limit
                 0,       // Expected Offset
-                $"/Weight?limit=3&offset=3&datefrom={DateOnly.FromDateTime(DateTime.Now.AddDays(-9)).ToString("dd/MM/yyyy")}"     // Expected Next value
+                $"/Weight?limit=3&offset=3&datefrom={DateOnly.FromDateTime(DateTime.Now.AddDays(-9)).ToString("yyyy/MM/dd")}"     // Expected Next value
             },
             new object[]
             {
@@ -431,7 +431,7 @@ namespace WeightTrackerTests.ControllersTests
                 200,     // Expected status code
                 3,       // Expected Limit
                 0,       // Expected Offset
-                $"/Weight?limit=3&offset=3&dateto={DateOnly.FromDateTime(DateTime.Now.AddDays(-1)).ToString("dd/MM/yyyy")}"     // Expected Next value
+                $"/Weight?limit=3&offset=3&dateto={DateOnly.FromDateTime(DateTime.Now.AddDays(-1)).ToString("yyyy/MM/dd")}"     // Expected Next value
             },
         ];
 
