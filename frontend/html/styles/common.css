@@ -129,9 +129,8 @@ nav {
   padding: 5px;
   background-color: #0d74f5;
   color: white;
-  /* position: fixed;
+  position: sticky;
   top: 0;
-  left: 0; */
 }
 
 .nav-header {
@@ -159,7 +158,6 @@ nav {
   display: inline-block;
   width: 100%;
   padding: 10px;
-
 }
 
 .wrapper-with-nav {

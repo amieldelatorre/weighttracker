@@ -16,7 +16,7 @@ services:
   #     - backend
 
   frontend:
-    image: amieldelatorre/weighttracker-frontend:latest
+    build: ./frontend
     container_name: frontend
     restart: unless-stopped
     ports: 
@@ -27,7 +27,7 @@ services:
       - backend
 
   backend:
-    image: amieldelatorre/weighttracker-backend:latest
+    build: ./backend/WeightTracker
     container_name: backend
     restart: unless-stopped
     ports:

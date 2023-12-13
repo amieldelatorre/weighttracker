@@ -1,70 +1,190 @@
-﻿using Castle.Core.Logging;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices.ObjectiveC;
-using System.Text;
-using System.Threading.Tasks;
 using WeightTracker.Authentication;
 using WeightTracker.Controllers;
+using WeightTracker.Controllers.QueryParameters;
 using WeightTracker.Data;
+using WeightTracker.Enums;
 using WeightTracker.Models.User;
 using WeightTracker.Models.Weight;
+using System.Security.Claims;
+using Castle.Components.DictionaryAdapter.Xml;
+using WeightTracker.Models;
 
 namespace WeightTrackerTests.ControllersTests
 {
     internal class WeightControllerTests
     {
-        private readonly WeightController _weightController;
-        private readonly Mock<IWeightRepo> _mockWeightRepo;
-        private readonly Mock<IUserRepo> _mockUserRepo;
-        private readonly Mock<IAuthService> _mockAuthService;
+        private readonly IWeightRepo _weightRepo;
+        private readonly IUserRepo _userRepo;
         private readonly ILogger<WeightController> _logger;
+        private readonly WeightTrackerDbContext _context;
+        private static readonly List<string> _existingUserEmails = ["james.smith@example.com", "james.smith2@example.com"];
+        private readonly List<User> _existingUser;
 
         public WeightControllerTests()
         {
-            _mockWeightRepo = new Mock<IWeightRepo>();
-            _mockUserRepo = new Mock<IUserRepo>();
-            _mockAuthService = new Mock<IAuthService>();
+            SQLiteContext sQLiteContext = new();
+            _context = sQLiteContext.CreateSQLiteContext();
+
+            _weightRepo = new WeightRepo(_context);
+            _userRepo = new UserRepo(_context);
             _logger = Mock.Of<ILogger<WeightController>>();
-            _weightController = new WeightController(_logger, _mockWeightRepo.Object, _mockUserRepo.Object, _mockAuthService.Object);
+
+            _existingUser = [
+                new User()
+                {
+                    Id = 1,
+                    FirstName = "James",
+                    LastName = "Smith",
+                    Email = _existingUserEmails[0],
+                    Password = BCrypt.Net.BCrypt.HashPassword("password"),
+                    DateOfBirth = DateOnly.FromDateTime(DateTime.Now.AddDays(-9132)),
+                    Gender = GenderEnum.MALE,
+                    Height = 165,
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now
+                },
+                new User()
+                {
+                    Id = 2,
+                    FirstName = "James",
+                    LastName = "Smith",
+                    Email = _existingUserEmails[1],
+                    Password = BCrypt.Net.BCrypt.HashPassword("password"),
+                    DateOfBirth = DateOnly.FromDateTime(DateTime.Now.AddDays(-9132)),
+                    Gender = GenderEnum.MALE,
+                    Height = 165,
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now
+                },
+            ];
+        }
+
+        [OneTimeSetUp]
+        public void TestSetUp()
+        {
+            _context.AddRange(_existingUser);
+            _context.AddRange(
+                new Weight()
+                {
+                    Id = 1,
+                    UserId = _existingUser[0].Id,
+                    UserWeight = 72,
+                    Date = DateOnly.FromDateTime(DateTime.Now),
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now
+                },
+                new Weight()
+                {
+                    Id = 2,
+                    UserId = 1,
+                    UserWeight = 50,
+                    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(-1)),
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now
+                },
+                new Weight()
+                {
+                    Id = 3,
+                    UserId = _existingUser[0].Id,
+                    UserWeight = 50,
+                    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(-2)),
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now
+                },
+                new Weight()
+                {
+                    Id = 4,
+                    UserId = _existingUser[0].Id,
+                    UserWeight = 50,
+                    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(-3)),
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now
+                },
+                new Weight()
+                {
+                    Id = 5,
+                    UserId = _existingUser[0].Id,
+                    UserWeight = 50,
+                    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(-4)),
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now
+                },
+                new Weight()
+                {
+                    Id = 6,
+                    UserId = _existingUser[0].Id,
+                    UserWeight = 50,
+                    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(-5)),
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now
+                },
+                new Weight()
+                {
+                    Id = 7,
+                    UserId = _existingUser[0].Id,
+                    UserWeight = 50,
+                    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(-6)),
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now
+                },
+                new Weight()
+                {
+                    Id = 8,
+                    UserId = _existingUser[0].Id,
+                    UserWeight = 50,
+                    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(-7)),
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now
+                },
+                new Weight()
+                {
+                    Id = 9,
+                    UserId = _existingUser[0].Id,
+                    UserWeight = 50,
+                    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(-8)),
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now
+                },
+                new Weight()
+                {
+                    Id = 10,
+                    UserId = _existingUser[1].Id,
+                    UserWeight = 50,
+                    Date = DateOnly.FromDateTime(DateTime.Now),
+                    DateCreated = DateTime.Now,
+                    DateModified = DateTime.Now
+                }
+            );
+            _context.SaveChanges();
         }
 
         [OneTimeTearDown]
         public void TestTearDown()
         {
-            _weightController.Dispose();
+            _context.Dispose();
         }
 
-        [Test, TestCaseSource(nameof(WeightControllerCreateWeightTestProvider))]
-        public void CreateWeightTest(WeightCreate weightCreate, bool emailFound, bool weightExistsForUserAndDate, bool createWeightResult, int expectedStatusCode)
+        [Test, TestCaseSource(nameof(CreateWeightTestProvider))]
+        public void CreateWeightTest(WeightCreate weightCreate, string email, int expectedStatusCode)
         {
-            User testUser = new()
-            {
-                Id = 1,
-                FirstName = "FirstName",
-                LastName = "LastName",
-                Email = "email@example.com",
-                Password = "password",
-                DateOfBirth = DateOnly.FromDateTime(DateTime.Now),
-                Gender = WeightTracker.Enums.GenderEnum.MALE,
-                Height = 165,
-                DateCreated = DateTime.Now,
-                DateModified = DateTime.Now
-            };
-
-            _mockAuthService.Setup(service => service.GetEmailFromClaims()).Returns(testUser.Email);
-            if (!emailFound)
-                _mockUserRepo.Setup(repo => repo.GetByEmail(It.IsAny<string>())).Returns(Task.FromResult<User?>(null));
-            else
-                _mockUserRepo.Setup(repo => repo.GetByEmail(It.IsAny<string>())).Returns(Task.FromResult<User?>(testUser));
-            _mockWeightRepo.Setup(repo => repo.WeightExistsForUserIdAndDate(It.IsAny<int>(), It.IsAny<DateOnly>())).Returns(Task.FromResult(weightExistsForUserAndDate));
-            _mockWeightRepo.Setup(repo => repo.Add(It.IsAny<Weight>())).Returns(Task.FromResult(createWeightResult));
-
-            var result = _weightController.CreateWeight(weightCreate).GetAwaiter().GetResult();
+            // Setup up the authentication claim Http Context
+            HttpContextAccessor httpContextAccessor = new HttpContextAccessor();
+            DefaultHttpContext httpContext = new();
+            var claims = new[] { new Claim("Email", email) };
+            httpContext.User = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    claims, "Basic"
+                )
+            );
+            httpContextAccessor.HttpContext = httpContext;
+            AuthService authService = new AuthService(httpContextAccessor);
+            WeightController weightController = new WeightController(_logger, _weightRepo, _userRepo, authService);
+            
+            var result = weightController.CreateWeight(weightCreate).GetAwaiter().GetResult();
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
 #pragma warning disable CS8605 // Unboxing a possibly null value.
             int resultStatusCode = (int)result.GetType().GetProperty("StatusCode").GetValue(result, null);
@@ -75,86 +195,389 @@ namespace WeightTrackerTests.ControllersTests
             
         }
 
-        internal static object[] WeightControllerCreateWeightTestProvider =
-        [
+        [Test, TestCaseSource(nameof(GetWeightbyIdTestProvider))]
+        public void GetWeightByIdTest(int weightId, string email, int expectedStatusCode)
+        {
+            // Setup up the authentication claim Http Context
+            HttpContextAccessor httpContextAccessor = new HttpContextAccessor();
+            DefaultHttpContext httpContext = new();
+            var claims = new[] { new Claim("Email", email) };
+            httpContext.User = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    claims, "Basic"
+                )
+            );
+            httpContextAccessor.HttpContext = httpContext;
+            AuthService authService = new AuthService(httpContextAccessor);
+            WeightController weightController = new WeightController(_logger, _weightRepo, _userRepo, authService);
+
+
+            var result = weightController.GetWeightById(weightId).GetAwaiter().GetResult();
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+#pragma warning disable CS8605 // Unboxing a possibly null value.
+            int resultStatusCode = (int)result.GetType().GetProperty("StatusCode").GetValue(result, null);
+#pragma warning restore CS8605 // Unboxing a possibly null value.
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+            Assert.That(resultStatusCode, Is.EqualTo(expectedStatusCode));
+        }
+
+        [Test, TestCaseSource(nameof(WeightControllerGetWeightsTestProvider))]
+        public void GetWeightsTest(GetWeightsQueryParameters queryParameters, string email, int expectedStatusCode, int? expectedLimit, 
+            int? expectedOffset, string? expectedNext)
+        {
+            // Setup up the authentication claim Http Context
+            HttpContextAccessor httpContextAccessor = new HttpContextAccessor();
+            DefaultHttpContext httpContext = new();
+            var claims = new[] { new Claim("Email", email) };
+            httpContext.User = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    claims, "Basic"
+                )
+            );
+            httpContextAccessor.HttpContext = httpContext;
+            AuthService authService = new AuthService(httpContextAccessor);
+            WeightController weightController = new WeightController(_logger, _weightRepo, _userRepo, authService);
+
+            // Setup Controller Http Context Request Path
+            weightController.ControllerContext = new ControllerContext();
+            weightController.ControllerContext.HttpContext = new DefaultHttpContext();
+            weightController.ControllerContext.HttpContext.Request.Path = "/Weight";
+
+            var controllerResult = weightController.GetWeights(queryParameters).GetAwaiter().GetResult();
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+#pragma warning disable CS8605 // Unboxing a possibly null value.
+            int controllerResultStatusCode = (int)controllerResult.Result.GetType().GetProperty("StatusCode").GetValue(controllerResult.Result, null);
+#pragma warning restore CS8605 // Unboxing a possibly null value.
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+            if (controllerResultStatusCode == 200)
+            {
+                var value = (PaginatedResult<Weight>)((ObjectResult)controllerResult.Result).Value;
+                Assert.That(value.Limit, Is.EqualTo(expectedLimit));
+                Assert.That(value.Offset, Is.EqualTo(expectedOffset));
+                Assert.That(value.Next, Is.EqualTo(expectedNext));
+            }
+
+
+            Assert.That(controllerResultStatusCode, Is.EqualTo(expectedStatusCode));
+        }
+
+        internal static object[] WeightControllerGetWeightsTestProvider = [
+            // Skipping total as it becomes modified by other tests
             new object[]
             {
-                new WeightCreate()
+                /*
+                 * Test the response of the Weight Controller Get All Endpoint that has invalid input with the following error(s):
+                 *      - Email does not exist
+                 */
+                new GetWeightsQueryParameters()
                 {
-                    UserWeight = 0,
-                    Date = DateOnly.FromDateTime(DateTime.Now),
-                    Description = "something"
-                },
-                false,  // If the User is found with the email provided
-                false,  // Weight already exists for user id and date combination
-                false,  // Create weight result
+                    Limit = 3,
+                    Offset = 0,
+                },       // Query parameters
+                "email@NotFound.com",
+                404,     // Expected status code
+                null,    // Expected Limit
+                null,    // Expected Offset
+                null     // Expected Next value
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Get All Endpoint that succeeds:
+                 *      - With no query parameters
+                 */
+                new GetWeightsQueryParameters()
+                {
+                },       // Query parameters
+                _existingUserEmails[0],
+                200,     // Expected status code
+                100,     // Expected Limit
+                0,       // Expected Offset
+                null     // Expected Next value
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Get All Endpoint that succeeds:
+                 *      - With Limit parameter
+                 */
+                new GetWeightsQueryParameters()
+                {
+                    Limit = 3,
+                },       // Query parameters
+                _existingUserEmails[0],
+                200,     // Expected status code
+                3,       // Expected Limit
+                0,       // Expected Offset
+                "/Weight?limit=3&offset=3"  // Expected Next value
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Get All Endpoint that succeeds:
+                 *      - With Offset parameter
+                 */
+                new GetWeightsQueryParameters()
+                {
+                    Offset = 100,
+                },       // Query parameters
+                _existingUserEmails[0],
+                200,     // Expected status code
+                100,     // Expected Limit
+                100,     // Expected Offset
+                null     // Expected Next value
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Get All Endpoint that succeeds:
+                 *      - With Limit and Offset query parameters
+                 */
+                new GetWeightsQueryParameters()
+                {
+                    Limit = 3,
+                    Offset = 0,
+                },       // Query parameters
+                _existingUserEmails[0],
+                200,     // Expected status code
+                3,       // Expected Limit
+                0,       // Expected Offset
+                "/Weight?limit=3&offset=3"  // Expected Next value
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Get All Endpoint that succeeds:
+                 *      - With Limit and Offset query parameters
+                 */
+                new GetWeightsQueryParameters()
+                {
+                    Limit = 3,
+                    Offset = 3,
+                },       // Query parameters
+                _existingUserEmails[0],
+                200,     // Expected status code
+                3,       // Expected Limit
+                3,       // Expected Offset
+                "/Weight?limit=3&offset=6"  // Expected Next value
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Get All Endpoint that succeeds:
+                 *       - With Limit and Offset query parameters
+                 */
+                new GetWeightsQueryParameters()
+                {
+                    Limit = 100,
+                    Offset = 0,
+                },       // Query parameters
+                _existingUserEmails[0],
+                200,     // Expected status code
+                100,     // Expected Limit
+                0,       // Expected Offset
+                null     // Expected Next value
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Get All Endpoint that succeeds:
+                 *       - With Limit, Offset, DateFrom and DateTo query parameters
+                 */
+                new GetWeightsQueryParameters()
+                {
+                    Limit = 3,
+                    Offset = 0,
+                    DateFrom = DateOnly.FromDateTime(DateTime.Now.AddDays(-9)),
+                    DateTo = DateOnly.FromDateTime(DateTime.Now.AddDays(-1)),
+                },       // Query parameters
+                _existingUserEmails[0],
+                200,     // Expected status code
+                3,       // Expected Limit
+                0,       // Expected Offset
+                $"/Weight?limit=3&offset=3&datefrom={DateOnly.FromDateTime(DateTime.Now.AddDays(-9)).ToString("yyyy/MM/dd")}&dateto={DateOnly.FromDateTime(DateTime.Now.AddDays(-1)).ToString("yyyy/MM/dd")}"     // Expected Next value
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Get All Endpoint that succeeds:
+                 *        - With Limit, Offset and DateFrom query parameters
+                 */
+                new GetWeightsQueryParameters()
+                {
+                    Limit = 3,
+                    Offset = 0,
+                    DateFrom = DateOnly.FromDateTime(DateTime.Now.AddDays(-9)),
+                },       // Query parameters
+                _existingUserEmails[0],
+                200,     // Expected status code
+                3,       // Expected Limit
+                0,       // Expected Offset
+                $"/Weight?limit=3&offset=3&datefrom={DateOnly.FromDateTime(DateTime.Now.AddDays(-9)).ToString("yyyy/MM/dd")}"     // Expected Next value
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Get All Endpoint that succeeds:
+                 *        - With Limit, Offset and DateTo query parameters
+                 */
+                new GetWeightsQueryParameters()
+                {
+                    Limit = 3,
+                    Offset = 0,
+                    DateTo = DateOnly.FromDateTime(DateTime.Now.AddDays(-1)),
+                },       // Query parameters
+                _existingUserEmails[0],
+                200,     // Expected status code
+                3,       // Expected Limit
+                0,       // Expected Offset
+                $"/Weight?limit=3&offset=3&dateto={DateOnly.FromDateTime(DateTime.Now.AddDays(-1)).ToString("yyyy/MM/dd")}"     // Expected Next value
+            },
+        ];
+
+        internal static object[] GetWeightbyIdTestProvider = [
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Get by Id Endpoint that has invalid input with the following error(s):
+                 *      - Weight Id cannot be found
+                 *      - Email cannot be found
+                 */
+                500,      // Weight Id
+                "email@NotFound.com",
                 404     // Expected status code
             },
             new object[]
             {
+                /*
+                 * Test the response of the Weight Controller Get by Id Endpoint that has invalid input with the following error(s):
+                 *      - Email cannot be found
+                 */
+                1,      // Weight Id
+                "email@NotFound.com",
+                404     // Expected status code
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Get by Id Endpoint that has invalid input with the following error(s):
+                 *      - Weight Id cannot be found
+                 */
+                501,      // Weight Id
+                _existingUserEmails[0],
+                404     // Expected status code
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Get by Id Endpoint that has invalid input with the following error(s):
+                 *      - Weight with Weight Id of 1 belongs to _existingUserEmails[0]
+                 */
+                1,      // Weight Id
+                _existingUserEmails[1],
+                404     // Expected status code
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Get by Id Endpoint that succeeds
+                 */
+                1,      // Weight Id
+                _existingUserEmails[0],
+                200     // Expected status code
+            },
+        ];
+
+        internal static object[] CreateWeightTestProvider = [
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Post Endpoint that has invalid input with the following error(s):
+                 *      - An Email that does not exist
+                 */
+                new WeightCreate()
+                {
+                    UserWeight = 72,
+                    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(-1)),
+                    Description = "something"
+                },
+                "email@NotFound.com",
+                404     // Expected status code
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Post Endpoint that has invalid input with the following error(s):
+                 *      - User weight is less than or equal to 0
+                 */
                 new WeightCreate()
                 {
                     UserWeight = 0,
-                    Date = DateOnly.FromDateTime(DateTime.Now),
+                    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(-1)),
                     Description = "something"
                 },
-                true,   // If the User is found with the email provided
-                false,  // Weight already exists for user id and date combination
-                false,  // Create weight result
+                _existingUserEmails[0],
                 400     // Expected status code
             },
             new object[]
             {
+                /*
+                 * Test the response of the Weight Controller Post Endpoint that has invalid input with the following error(s):
+                 *      - Date is greater than today's date
+                 */
                 new WeightCreate()
                 {
-                    UserWeight = 0,
-                    Date = DateOnly.FromDateTime(DateTime.Now),
-                    Description = "something"
-                },
-                true,   // If the User is found with the email provided
-                false,  // Weight already exists for user id and date combination
-                false,  // Create weight result
-                400     // Expected status code
-            },
-            new object[]
-            {
-                new WeightCreate()
-                {
-                    UserWeight = 154.8,
+                    UserWeight = 72,
                     Date = DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
                     Description = "something"
                 },
-                true,   // If the User is found with the email provided
-                false,  // Weight already exists for user id and date combination
-                false,  // Create weight result
+                _existingUserEmails[0],
                 400     // Expected status code
             },
             new object[]
             {
+                /*
+                 * Test the response of the Weight Controller Post Endpoint that has invalid input with the following error(s):
+                 *      - User and Date combination already exists
+                 */
                 new WeightCreate()
                 {
-                    UserWeight = 154.8,
+                    UserWeight = 72,
                     Date = DateOnly.FromDateTime(DateTime.Now),
                     Description = "something"
                 },
-                true,   // If the User is found with the email provided
-                true,  // Weight already exists for user id and date combination
-                false,  // Create weight result
+                _existingUserEmails[0],
                 400     // Expected status code
             },
             new object[]
             {
+                /*
+                 * Test the response of the Weight Controller Post Endpoint that succeeds
+                 */
                 new WeightCreate()
                 {
-                    UserWeight = 154.8,
-                    Date = DateOnly.FromDateTime(DateTime.Now),
+                    UserWeight = 72,
+                    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(-10)),
                     Description = "something"
                 },
-                true,   // If the User is found with the email provided
-                false,  // Weight already exists for user id and date combination
-                true,  // Create weight result
+                _existingUserEmails[0],
                 201     // Expected status code
             },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Post Endpoint that succeeds
+                 *      - When existingUserEmails[1] creates a weight for the same day as existingUserEmails[0]
+                 */
+                new WeightCreate()
+                {
+                    UserWeight = 72,
+                    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(-10)),
+                    Description = "something"
+                },
+                _existingUserEmails[1],
+                201     // Expected status code
+            }
         ];
     }
 }

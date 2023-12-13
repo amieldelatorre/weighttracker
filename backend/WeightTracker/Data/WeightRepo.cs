@@ -3,11 +3,11 @@ using WeightTracker.Models.Weight;
 
 namespace WeightTracker.Data
 {
-    public class PgWeightRepo : IWeightRepo
+    public class WeightRepo : IWeightRepo
     {
         private readonly WeightTrackerDbContext _context;
 
-        public PgWeightRepo(WeightTrackerDbContext context)
+        public WeightRepo(WeightTrackerDbContext context)
         {
             _context = context;
         }
@@ -23,6 +23,18 @@ namespace WeightTracker.Data
         {
             Weight? weight = await _context.Weights.SingleOrDefaultAsync(weight => (weight.UserId == userId && weight.Date == date));
             return weight != null;
+        }
+
+        async public Task<Weight?> GetById(int userId, int weightId)
+        {
+            Weight? weight = await _context.Weights.SingleOrDefaultAsync(weight => weight.UserId == userId && weight.Id == weightId);
+            return weight;
+        }
+
+        public IQueryable<Weight> GetAllByUserId(int userId)
+        {
+            IQueryable<Weight> weights = _context.Weights.Where(weight => weight.UserId == userId);
+            return weights;
         }
     }
 }

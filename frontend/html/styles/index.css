@@ -1,3 +1,7 @@
+.content {
+  margin-left: 30px;
+}
+
 .add-weight-form-fields {
   display: flex;
   flex-wrap: wrap;
@@ -11,7 +15,6 @@
   min-width: 800px;;
   border-radius: 6px;
   border: 1px black solid;
-  margin-left: 30px;
   margin-top: 20px;
 }
 
@@ -26,4 +29,37 @@
   background-color: #20c8ff;
   width: 60px;
   max-height: 30px;
+}
+
+.chart-container {
+  width: 70%;
+  max-width: 800px;
+  min-width: 800px;
+  margin-top: 20px;
+}
+
+#chart {
+  width: 100%;
+}
+
+.table-container {
+  width: 70%;
+  max-width: 800px;
+  min-width: 800px;
+  margin-top: 20px;
+}
+
+table {
+  margin: auto;
+}
+
+td, th {
+  border: 1px solid #999;
+  padding: 5px;
+  text-align: center;
+  min-width: 150px;
+}
+
+td {
+  background: #0d74f55e;
 }
