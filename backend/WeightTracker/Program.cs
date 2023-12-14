@@ -21,7 +21,6 @@ builder.Configuration.AddEnvironmentVariables(prefix: "WeightTracker_");
 
 builder.Services.AddDbContext<WeightTrackerDbContext>(
     options => options.UseNpgsql(ConfigurationExtensions.GetConnectionString(builder.Configuration, "WebAPIDatabaseConnection"))
-    //options => options.UseNpgsql(builder.Configuration.GetConnectionString("WebAPIDatabaseConnection"))
 );
 builder.Services.AddScoped<IUserRepo, UserRepo>();
 builder.Services.AddScoped<IWeightRepo, WeightRepo>(); 
@@ -57,6 +56,30 @@ using (var scope = app.Services.CreateScope())
     {
         logger.LogError("Unable to connect to database. Exiting.");
         Environment.Exit(1);
+    }
+
+    // Check if there are any pending database migrations and check the environment variable"MIGRATE_DATABASE".
+    // If there are pending migrations and MIGRATE_DATABSE is true perform the migrations, else exit.
+    _ = bool.TryParse(builder.Configuration.GetValue<string?>("MIGRATE_DATABASE", null), out bool migrateDatabase);
+    if (dbContext.Database.GetPendingMigrations().Any())
+    {
+        if (migrateDatabase != true)
+        {
+            logger.LogError("There are pending Database Migrations, please set the environment variable \"MIGRATE_DATABASE=True\"");
+            Environment.Exit(1);
+        }
+
+        try
+        {
+            logger.LogInformation("Performing database migration.");
+            dbContext.Database.Migrate();
+            logger.LogInformation("Database migration performed successfully.");
+        } catch (Exception ex)
+        {
+            logger.LogError("Error performing database migration.");
+            logger.LogError(ex.ToString());
+            Environment.Exit(1);
+        }
     }
     logger.LogDebug("Able to connect to database. Proceeding with startup.");
 }
