@@ -23,9 +23,8 @@ async function checkLoggedIn() {
       },
       body: JSON.stringify(data)
     }).then(response => {
-      if (response.ok) {
-        console.log("Logged in works! Proceeding");
-      } else {
+      if (response.ok) {} 
+      else {
         clearCredentialsAndRedirect();
       }
     }).catch(error => {

@@ -241,5 +241,3 @@ let data = getWeightData(
   dateFrom=dateFrom.toISOString().split('T')[0], 
   dateTo=dateTo.toISOString().split('T')[0]
 );
-
-console.log(data)
