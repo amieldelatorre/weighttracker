@@ -25,7 +25,10 @@
       "launchBrowser": true,
       "launchUrl": "swagger",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "WeightTracker_ConnectionStrings__WebAPIDatabaseConnectionLocal": "Host=localhost; Port=5432; Database=weighttracker; Username=root; Password=root",
+        "WeightTracker_MIGRATE_DATABASE": "TrUe",
+        "WeightTracker_ConnectionStrings__WebAPIDatabaseConnection": "Host=192.168.0.110; Port=5432; Database=weighttracker; Username=root; Password=root"
       }
     },
     "Docker": {
