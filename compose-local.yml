@@ -36,7 +36,8 @@ services:
       - network-db
       - network-backend
     environment:
-      - WeightTracker_ConnectionStrings__WebAPIDatabaseConnection=Host=192.168.0.110; Port=5432; Database=weighttracker; Username=root; Password=root
+      - WeightTracker_ConnectionStrings__WebAPIDatabaseConnection=Host=${POSTGRES_HOST:-pg-db}; Port=${POSTGRES_PORT:-5432}; Database=${POSTGRES_DB:-weighttracker}; Username=${POSTGRES_USER:-root}; Password=${POSTGRES_PASSWORD:-root}
+      - MIGRATE_DATABASE=True
     # depends_on:
     #   - pg-db
   
