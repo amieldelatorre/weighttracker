@@ -85,29 +85,3 @@ window.addEventListener("load", () => {
     addGenericNotification(notification);
   } 
 });
-
-
-// window.addEventListener("load", async () => {
-//   let data = {
-//     "email": "james.smith@example.com",
-//     "password": "password"
-//   }
-
-//   await fetch(URL=`${API_URL}/Auth/login`, {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json"
-//     },
-//     body: JSON.stringify(data)
-//   })
-//   .then(res => {
-//     if (res.ok) {
-//       console.log("Login success");
-//     } else if (res.status === 401) {
-//       console.log("Email and Password combination not found.")
-//     } else {
-//       console.log("Something went terribly wrong.")
-//     }
-//   })
-// });
-
