@@ -13,6 +13,8 @@ services:
       - network-backend
     depends_on:
       - backend
+    environment:
+      - TZ=Pacific/Auckland
 
   backend:
     image: amieldelatorre/weighttracker-backend:latest
@@ -24,6 +26,7 @@ services:
       - network-db
       - network-backend
     environment:
+      - TZ=Pacific/Auckland
       - WeightTracker_ConnectionStrings__WebAPIDatabaseConnection=Host=${POSTGRES_HOST:-pg-db}; Port=${POSTGRES_PORT:-5432}; Database=${POSTGRES_DB:-weighttracker}; Username=${POSTGRES_USER:-root}; Password=${POSTGRES_PASSWORD:-root}
       - MIGRATE_DATABASE=True
     depends_on:
