@@ -380,7 +380,7 @@ namespace WeightTrackerTests.ControllersTests
                 new WeightUpdate()
                 {
                     UserWeight = 80,
-                    Date  = DateOnly.FromDateTime(DateTime.Now.AddDays(-10))
+                    Date  = DateOnly.FromDateTime(DateTime.Now.AddDays(-11))
                 },
                 _existingUserEmails[0],
                 1,      // weightId to update
