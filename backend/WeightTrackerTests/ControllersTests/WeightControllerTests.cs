@@ -12,6 +12,7 @@ using WeightTracker.Models.Weight;
 using System.Security.Claims;
 using Castle.Components.DictionaryAdapter.Xml;
 using WeightTracker.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace WeightTrackerTests.ControllersTests
 {
@@ -80,7 +81,7 @@ namespace WeightTrackerTests.ControllersTests
                 new Weight()
                 {
                     Id = 2,
-                    UserId = 1,
+                    UserId = _existingUser[0].Id,
                     UserWeight = 50,
                     Date = DateOnly.FromDateTime(DateTime.Now.AddDays(-1)),
                     DateCreated = DateTime.Now,
@@ -260,6 +261,132 @@ namespace WeightTrackerTests.ControllersTests
 
             Assert.That(controllerResultStatusCode, Is.EqualTo(expectedStatusCode));
         }
+
+        [Test, TestCaseSource(nameof(WeightControllerUpdateWeightsTestProvider))]
+        public void UpdateWeightsTest(WeightUpdate weightUpdate, string email, int weightId, int expectedStatusCode)
+        {
+            // Setup up the authentication claim Http Context
+            HttpContextAccessor httpContextAccessor = new HttpContextAccessor();
+            DefaultHttpContext httpContext = new();
+            var claims = new[] { new Claim("Email", email) };
+            httpContext.User = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    claims, "Basic"
+                )
+            );
+            httpContextAccessor.HttpContext = httpContext;
+            AuthService authService = new AuthService(httpContextAccessor);
+            WeightController weightController = new WeightController(_logger, _weightRepo, _userRepo, authService);
+
+            // Setup Controller Http Context Request Path
+            weightController.ControllerContext = new ControllerContext();
+            weightController.ControllerContext.HttpContext = new DefaultHttpContext();
+            weightController.ControllerContext.HttpContext.Request.Path = "/Weight";
+
+            var controllerResult = weightController.UpdateWeight(weightId, weightUpdate).GetAwaiter().GetResult();
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+#pragma warning disable CS8605 // Unboxing a possibly null value.
+            int controllerResultStatusCode = (int)controllerResult.GetType().GetProperty("StatusCode").GetValue(controllerResult, null);
+#pragma warning restore CS8605 // Unboxing a possibly null value.
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+
+
+            Assert.That(controllerResultStatusCode, Is.EqualTo(expectedStatusCode));
+        }
+
+        internal static object[] WeightControllerUpdateWeightsTestProvider = [
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Update Endpoint that has invalid input with the following error(s):
+                 *      - Date is greater than today's date
+                 *      - User weight is less than or equal to 0
+                 */
+                new WeightUpdate()
+                {
+                    UserWeight = 0,
+                    Date  = DateOnly.FromDateTime(DateTime.Now.AddDays(1))
+                },
+                _existingUserEmails[0],
+                1,      // weightId to update
+                400     // Expected status code
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Update Endpoint that has invalid input with the following error(s):
+                 *      - User weight is less than or equal to 0
+                 */
+                new WeightUpdate()
+                {
+                    UserWeight = 0,
+                    Date  = DateOnly.FromDateTime(DateTime.Now.AddDays(-10))
+                },
+                _existingUserEmails[0],
+                1,      // weightId to update
+                400     // Expected status code
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Update Endpoint that has invalid input with the following error(s):
+                 *      - Date is greater than today's date
+                 */
+                new WeightUpdate()
+                {
+                    UserWeight = 50,
+                    Date  = DateOnly.FromDateTime(DateTime.Now.AddDays(1))
+                },
+                _existingUserEmails[0],
+                1,      // weightId to update
+                400     // Expected status code
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Update Endpoint that has invalid input with the following error(s):
+                 *      - User and date combination is unique and overlaps with an existing entry that points to the same date
+                 */
+                new WeightUpdate()
+                {
+                    UserWeight = 80,
+                    Date  = DateOnly.FromDateTime(DateTime.Now.AddDays(-2))
+                },
+                _existingUserEmails[0],
+                1,      // weightId to update
+                400     // Expected status code
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Update Endpoint that succeeds:
+                 *      - When updating the weight for the same date as the original weight entry
+                 */
+                new WeightUpdate()
+                {
+                    UserWeight = 80,
+                    Date  = DateOnly.FromDateTime(DateTime.Now)
+                },
+                _existingUserEmails[0],
+                1,      // weightId to update
+                200     // Expected status code
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Update Endpoint that succeeds:
+                 *      - When updating the weight to a different date from the original weight entry, with no prior entries for that date
+                 */
+                new WeightUpdate()
+                {
+                    UserWeight = 80,
+                    Date  = DateOnly.FromDateTime(DateTime.Now.AddDays(-10))
+                },
+                _existingUserEmails[0],
+                1,      // weightId to update
+                200     // Expected status code
+            }
+        ];
 
         internal static object[] WeightControllerGetWeightsTestProvider = [
             // Skipping total as it becomes modified by other tests
