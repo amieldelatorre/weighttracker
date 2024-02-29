@@ -262,8 +262,8 @@ namespace WeightTrackerTests.ControllersTests
             Assert.That(controllerResultStatusCode, Is.EqualTo(expectedStatusCode));
         }
 
-        [Test, TestCaseSource(nameof(WeightControllerUpdateWeightsTestProvider))]
-        public void UpdateWeightsTest(WeightUpdate weightUpdate, string email, int weightId, int expectedStatusCode)
+        [Test, TestCaseSource(nameof(WeightControllerUpdateWeightTestProvider))]
+        public void UpdateWeightTest(WeightUpdate weightUpdate, string email, int weightId, int expectedStatusCode)
         {
             // Setup up the authentication claim Http Context
             HttpContextAccessor httpContextAccessor = new HttpContextAccessor();
@@ -294,7 +294,72 @@ namespace WeightTrackerTests.ControllersTests
             Assert.That(controllerResultStatusCode, Is.EqualTo(expectedStatusCode));
         }
 
-        internal static object[] WeightControllerUpdateWeightsTestProvider = [
+        [Test, TestCaseSource(nameof(WeightControllerDeleteWeightTestProvider))]
+        public void DeleteWeightTest(string email, int weightId, int expectedStatusCode)
+        {
+            // Setup up the authentication claim Http Context
+            HttpContextAccessor httpContextAccessor = new HttpContextAccessor();
+            DefaultHttpContext httpContext = new();
+            var claims = new[] { new Claim("Email", email) };
+            httpContext.User = new ClaimsPrincipal(
+                new ClaimsIdentity(
+                    claims, "Basic"
+                )
+            );
+            httpContextAccessor.HttpContext = httpContext;
+            AuthService authService = new AuthService(httpContextAccessor);
+            WeightController weightController = new WeightController(_logger, _weightRepo, _userRepo, authService);
+
+            // Setup Controller Http Context Request Path
+            weightController.ControllerContext = new ControllerContext();
+            weightController.ControllerContext.HttpContext = new DefaultHttpContext();
+            weightController.ControllerContext.HttpContext.Request.Path = "/Weight";
+
+            var controllerResult = weightController.DeleteWeight(weightId).GetAwaiter().GetResult();
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+#pragma warning disable CS8605 // Unboxing a possibly null value.
+            int controllerResultStatusCode = (int)controllerResult.GetType().GetProperty("StatusCode").GetValue(controllerResult, null);
+#pragma warning restore CS8605 // Unboxing a possibly null value.
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+
+
+            Assert.That(controllerResultStatusCode, Is.EqualTo(expectedStatusCode));
+        }
+
+        internal static object[] WeightControllerDeleteWeightTestProvider = [
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Delete Ednpoint that has invalid input with the following error(s):
+                 *      - Weight Id does not exist
+                 */
+                _existingUserEmails[0],
+                30,      // weightId to delete
+                404      // Expected status code   
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Delete Ednpoint that has invalid input with the following error(s):
+                 *      - Weight Id belongs to a different user
+                 */
+                _existingUserEmails[0],
+                10,      // weightId to delete
+                404      // Expected status code   
+            },
+            new object[]
+            {
+                /*
+                 * Test the response of the Weight Controller Delete Ednpoint that succeeds:
+                 *      - When a user deletes their own weight
+                 */
+                _existingUserEmails[0],
+                9,      // weightId to delete
+                200      // Expected status code   
+            }
+        ];
+
+        internal static object[] WeightControllerUpdateWeightTestProvider = [
             new object[]
             {
                 /*
