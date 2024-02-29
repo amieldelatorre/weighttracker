@@ -204,6 +204,40 @@ namespace WeightTracker.Controllers
             }
         }
 
+        [Authorize]
+        [HttpDelete("{weightId:int}")]
+        [Produces("application/json")]
+        async public Task<ActionResult> DeleteWeight(int weightId)
+        {
+            try
+            {
+                _logger.LogDebug("Retrieving user using Claims Identity");
+                User? user = await _userRepo.GetByEmail(_authService.GetEmailFromClaims());
+                // In reality, if you've made it this far the user should exist
+                if (user == null)
+                    return NotFound();
+
+                _logger.LogInformation("Retrieving weight");
+                Weight? weight = await _weightRepo.GetById(user.Id, weightId);
+                if (weight == null)
+                    return NotFound();
+
+                bool deletedSuccessfully = await _weightRepo.Delete(weight);
+                if (!deletedSuccessfully)
+                {
+                    _logger.LogError("Failed to delete weight, database delete failure");
+                    return StatusCode(StatusCodes.Status500InternalServerError, "Server is currently unable to handle your request");
+                }
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to delete weight: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Server is currently unable to handle your request");
+            }
+        }
+
             async private Task<FilteredResult<Weight>> GetFilteredWeights(int userId, GetWeightsQueryParameters queryParameters)
         {
             IQueryable<Weight> weightsQuery = _weightRepo.GetAllByUserId(userId);

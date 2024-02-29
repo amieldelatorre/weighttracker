@@ -10,5 +10,6 @@ namespace WeightTracker.Data
         Task<Weight?> GetById(int userId, int weightId);
         IQueryable<Weight> GetAllByUserId(int userId);
         Task<bool> Update(Weight weight);
+        Task<bool> Delete(Weight weight);
     }
 }

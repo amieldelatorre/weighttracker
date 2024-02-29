@@ -49,5 +49,12 @@ namespace WeightTracker.Data
             int saveResults = await _context.SaveChangesAsync();
             return saveResults > 0;
         }
+
+        public async Task<bool> Delete(Weight weight)
+        {
+            _context.Remove(weight);
+            int saveResults = await _context.SaveChangesAsync();
+            return saveResults > 0;
+        }
     }
 }
