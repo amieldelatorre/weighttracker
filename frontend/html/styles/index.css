@@ -63,3 +63,12 @@ td, th {
 td {
   background: #0d74f55e;
 }
+
+.table-action:hover {
+  cursor: pointer;
+}
+
+.table-action {
+  max-width: 35px;
+  margin: 0px 3px 0px 3px;
+}

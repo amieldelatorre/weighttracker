@@ -181,7 +181,7 @@ function getTableHeaderElement() {
   let tableHeaderElementRow = document.createElement("tr");
   tableHeaderElementRow.classList.add("weight-table-header-row");
 
-  const headers = ["Date", "Weight", "Description"];
+  const headers = ["Date", "Weight", "Description", "Actions"];
   headers.forEach(header => {
     let childTableHeader = document.createElement("th");
     childTableHeader.innerText = header;
@@ -189,6 +189,32 @@ function getTableHeaderElement() {
   });
 
   return tableHeaderElementRow;
+}
+
+function deleteWeight(weightId) {
+  alert(weightId);
+}
+
+function showEditForm(weightId) {
+  alert(weightId);
+}
+
+function getRowActions(weightId) {
+  let actionData = document.createElement("td");
+  
+  let editAction = document.createElement("img");
+  editAction.src = "images/edit-svgrepo-com.svg"
+  editAction.classList.add("table-action");
+  editAction.onclick = function() { showEditForm(weightId) };
+
+  let deleteAction = document.createElement("img");
+  deleteAction.src = "images/trash-2-svgrepo-com.svg"
+  deleteAction.classList.add("table-action");
+  deleteAction.onclick = function() { deleteWeight(weightId) };
+  
+  actionData.appendChild(editAction);
+  actionData.appendChild(deleteAction);
+  return actionData;
 }
 
 function getTableRow(entry) {
@@ -206,6 +232,7 @@ function getTableRow(entry) {
   tableRow.appendChild(dateData);
   tableRow.appendChild(weightData);
   tableRow.appendChild(descriptionData);
+  tableRow.appendChild(getRowActions(entry.id));
 
   return tableRow;
 }
