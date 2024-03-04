@@ -1,7 +1,7 @@
 function handleSignOut() {
   let signOutButton = document.getElementById("signout-button");
   signOutButton.onclick = () => {
-    clearCredentialsAndRedirect();
+    clearCredentialsAndRedirectToLogin();
   };
 }
 
@@ -23,7 +23,7 @@ function handleAddWeightFormSubmit() {
     };
 
 
-    await fetch(URL=`${API_URL}/Weight`, {
+    await fetch(url=`${API_URL}/Weight`, {
       method: "POST",
       cors: "no-cors",
       headers: {
@@ -52,7 +52,7 @@ function handleAddWeightFormSubmit() {
           let errorJSONPromise = response.json().then(err => err["errors"]);
           setValidationErrorModal(errorJSONPromise);
         } else if (response.status === 401) {
-          clearCredentialsAndRedirect();
+          clearCredentialsAndRedirectToLogin();
         } else {
           clearNotification();
 
@@ -95,8 +95,8 @@ async function getWeightData(limit=100, offset=0, dateFrom, dateTo) {
     params.append("dateTo", dateTo)
   }
 
-  let url = `${API_URL}/Weight?` + params;
-  weightData = await fetch(URL=url, {
+  let weightURL = `${API_URL}/Weight?` + params;
+  weightData = await fetch(url=weightURL, {
     method: "GET",
     cors: "no-cors",
     headers: {
@@ -119,7 +119,7 @@ async function getWeightData(limit=100, offset=0, dateFrom, dateTo) {
           };
           addGenericNotification(notification);
       } else if (response.status === 401) {
-        clearCredentialsAndRedirect();
+        clearCredentialsAndRedirectToLogin();
       } else {
         clearNotification();
 
@@ -229,8 +229,11 @@ window.addEventListener("load", async () => {
 });
  
 // Do this straight away
-checkLoggedIn();
+if (!isLoggedIn()) {
+  clearCredentialsAndRedirectToLogin();
+}
 
+// FIX DATE 
 let dateTo = new Date();
 let dateFrom = new Date();
 dateFrom.setDate(dateTo.getDate() - 30)

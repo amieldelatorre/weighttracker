@@ -11,7 +11,7 @@ async function handleLoginFormSubmit() {
       "password": password
     }
 
-    await fetch(URL=`${API_URL}/Auth/login`, {
+    await fetch(url=`${API_URL}/Auth/login`, {
       method: "POST",
       cors: "no-cors",
       headers: {
@@ -64,6 +64,15 @@ async function handleLoginFormSubmit() {
     });
   });
 }
+
+// Do this straight away
+isLoggedIn().then(
+  response => {
+    if (response) {
+      window.location.replace("/");
+    }
+  }
+);
 
 window.addEventListener("load", () => {
   handleLoginFormSubmit();

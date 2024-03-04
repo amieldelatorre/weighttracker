@@ -33,7 +33,7 @@ function handleSignupFormSubmit() {
       "height": height
     }
 
-    await fetch(URL=`${API_URL}/User`, {
+    await fetch(url=`${API_URL}/User`, {
       method: "POST",
       cors: "no-cors",
       headers: {
@@ -78,6 +78,15 @@ function handleSignupFormSubmit() {
     });
   });
 }
+
+// Do this straight away
+isLoggedIn().then(
+  response => {
+    if (response) {
+      window.location.replace("/");
+    }
+  }
+);
 
 window.addEventListener("load", () => {
   handleSignupFormSubmit();
