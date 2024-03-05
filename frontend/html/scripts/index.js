@@ -191,8 +191,78 @@ function getTableHeaderElement() {
   return tableHeaderElementRow;
 }
 
-function deleteWeight(weightId) {
-  alert(weightId);
+async function deleteWeight(weightId) {
+  const deleteURL = `${API_URL}/Weight/${weightId}`;
+  await fetch(url=deleteURL, {
+    method: "DELETE",
+    cors: "no-cors",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": getAuthHeaderValue()
+    }
+  }).then(async response => {
+    if (response.ok) {
+      clearNotification();
+      let notification = {
+        type: "success",
+        title: "Weight deleted successfully!",
+        messages: [
+          "Success !",
+          "Refreshing in 1.5s"
+        ]
+      };
+      addGenericNotification(notification);
+      await sleep(1500);
+      window.location.reload();
+    } else if (response.status === 404) {
+      clearNotification();
+      let notification = {
+        type: "error",
+        title: "The entry cannot be found and may have already been deleted",
+        messages: [
+          "Please refresh the page."
+        ]
+      };
+      addGenericNotification(notification);
+    } else if (response.status === 401) {
+      clearCredentialsAndRedirectToLogin();
+    } else {
+      clearNotification();
+
+      let notification = {
+        type: "error",
+        title: "Unable to reach server 😞",
+        messages: [
+          "Please try again later and if problem persists, please contact the administrator."
+        ]
+      };
+      addGenericNotification(notification);
+    }
+  }).catch(error => {
+    clearNotification();
+
+    let notification = {
+      type: "error",
+      title: "Unable to reach server 😞",
+      messages: [
+        "Please try again later and if problem persists, please contact the administrator."
+      ]
+    };
+    addGenericNotification(notification);
+  });
+}
+
+async function deleteWeightAction(weightId) {
+  let weightData = (await data).results.filter(item => {
+    return item.id == weightId;
+  })[0]; // There should only be one weightId and it should already exist
+
+  let weightDate = weightData.date;
+  let deleteConfirmed = confirm(`Are you sure you want to delete the weight for the date ${weightDate}?`);
+
+  if (deleteConfirmed) {
+    await deleteWeight(weightId);
+  }
 }
 
 function showEditForm(weightId) {
@@ -210,7 +280,7 @@ function getRowActions(weightId) {
   let deleteAction = document.createElement("img");
   deleteAction.src = "images/trash-2-svgrepo-com.svg"
   deleteAction.classList.add("table-action");
-  deleteAction.onclick = function() { deleteWeight(weightId) };
+  deleteAction.onclick = function() { deleteWeightAction(weightId) };
   
   actionData.appendChild(editAction);
   actionData.appendChild(deleteAction);
