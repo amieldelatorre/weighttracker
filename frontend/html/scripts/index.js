@@ -265,8 +265,42 @@ async function deleteWeightAction(weightId) {
   }
 }
 
-function showEditForm(weightId) {
-  alert(weightId);
+function handleUpdateWeightFormSubmit() {
+  let updateWeightForm = document.getElementById("update-weight-form");
+  updateWeightForm.addEventListener("submit", async (submitEvent) => {
+    submitEvent.preventDefault();
+    let weightId = document.getElementById("update-weightId").value;
+    console.log(weightId);
+  });
+}
+
+function closeEditWeightForm() {
+  let editFormModal = document.getElementById("edit-weight-form-modal");
+  // Remove values and stuff
+  if (editFormModal != null) {
+    document.getElementById("update-weight-form").reset();
+    document.getElementById("update-form-modify-time").innerText = "";
+    document.getElementById("update-form-create-time").innerText = "";
+    editFormModal.hidden = true;
+  }
+}
+
+async function showEditForm(weightId) {
+  console.log(weightId);
+  let editFormModal = document.getElementById("edit-weight-form-modal");
+  editFormModal.hidden = false;
+
+  let weightData = (await data).results.filter(item => {
+    return item.id == weightId;
+  })[0]; // There should only be one weightId and it should already exist
+
+  document.getElementById("update-weight-title").innerText = `Edit Entry for ${weightData.date}`;
+  document.getElementById("description-update").value = weightData.description !== undefined ? weightData.description : "";
+  document.getElementById("weight-update").value =  parseFloat(weightData.userWeight).toFixed(2);
+  document.getElementById("dateOfWeight-update").value = weightData.date;
+  document.getElementById("update-form-modify-time").innerText = weightData.dateModified;
+  document.getElementById("update-form-create-time").innerText = weightData.dateCreated;
+  document.getElementById("update-weightId").value = weightData.id;
 }
 
 function getRowActions(weightId) {
@@ -297,7 +331,7 @@ function getTableRow(entry) {
   weightData.innerText = parseFloat(entry.userWeight).toFixed(2);
 
   let descriptionData = document.createElement("td");
-  descriptionData.innerText = document.description !== undefined ? document.description : "";
+  descriptionData.innerText = entry.description !== undefined ? entry.description : "";
 
   tableRow.appendChild(dateData);
   tableRow.appendChild(weightData);
@@ -321,6 +355,7 @@ function createTable(weightData) {
 window.addEventListener("load", async () => {
   handleSignOut();
   handleAddWeightFormSubmit();
+  handleUpdateWeightFormSubmit();
   createChart((await data).results.reverse());
   createTable(await data);
 });

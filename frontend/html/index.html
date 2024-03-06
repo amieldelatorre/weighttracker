@@ -35,6 +35,47 @@
       </nav>
 
       <div class="content">
+        <div class="modal form-container update-weight-form-container" id="edit-weight-form-modal" hidden>
+          <span class="modal-exit" onclick="closeEditWeightForm()">&times;</span>
+          <h3 class="form-title" id="update-weight-title"></h3>
+          <form action="" class="update-weight-form" id="update-weight-form">
+            <div class="update-weight-form-fields">
+
+              <div class="input-field">
+                <label class="textarea-label" for="description-update">Description:</label>
+                <textarea id="description-update" name="description-update" placeholder="Notes"></textarea>
+              </div>
+
+              <div class="input-field">
+                <label for="weight-update">Weight (kg):</label>
+                <input type="number" step="0.01" id="weight-update" name="weight-update" min="0" required>
+              </div>
+    
+              <div class="input-field">
+                <label for="dateOfWeight-update">Date:</label>
+                <input type="date" id="dateOfWeight-update" name="dateOfWeight-update" required>
+              </div>
+
+              <div class="input-field show-time">
+                <label for="update-form-modify-time">Last Modified:</label>
+                <p id="update-form-modify-time">Timestamp1</p>
+              </div>
+
+              <div class="input-field show-time">
+                <label for="update-form-create-time">Created at:</label>
+                <p id="update-form-create-time">Timestamp2</p>
+              </div>
+
+              <input type="hidden" id="update-weightId" name="update-weightId"/>
+
+              <button type="submit">Submit</button>
+            </div><!--End of div update-weight-form-fields-->
+            
+            <p id="update-form-create-time"></p>
+          </form>
+        </div><!--End of update-weight-form-container div-->
+
+
         <div class="form-container add-weight-form-container">
           <h3 class="form-title">Add a weight measurement:</h3>
 
