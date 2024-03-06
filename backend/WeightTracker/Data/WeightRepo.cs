@@ -25,6 +25,12 @@ namespace WeightTracker.Data
             return weight != null;
         }
 
+        async public Task<Weight?> GetWeightByUserIdAndDate(int userId, DateOnly date)
+        {
+            Weight? weight = await _context.Weights.SingleOrDefaultAsync(weight => (weight.UserId == userId && weight.Date == date));
+            return weight;
+        }
+
         async public Task<Weight?> GetById(int userId, int weightId)
         {
             Weight? weight = await _context.Weights.SingleOrDefaultAsync(weight => weight.UserId == userId && weight.Id == weightId);
@@ -35,6 +41,20 @@ namespace WeightTracker.Data
         {
             IQueryable<Weight> weights = _context.Weights.Where(weight => weight.UserId == userId);
             return weights;
+        }
+
+        public async Task<bool> Update(Weight weight)
+        {
+            _context.Update(weight);
+            int saveResults = await _context.SaveChangesAsync();
+            return saveResults > 0;
+        }
+
+        public async Task<bool> Delete(Weight weight)
+        {
+            _context.Remove(weight);
+            int saveResults = await _context.SaveChangesAsync();
+            return saveResults > 0;
         }
     }
 }

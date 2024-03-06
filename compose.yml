@@ -6,7 +6,7 @@ services:
     container_name: frontend
     restart: unless-stopped
     volumes:
-      - ./config.js:/usr/share/nginx/html/scripts/config.js:ro
+      - ./frontend/html/scripts/config.js:/usr/share/nginx/html/scripts/config.js:ro
     ports: 
       - 8080:80
     networks:

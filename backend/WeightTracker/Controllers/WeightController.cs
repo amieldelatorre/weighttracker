@@ -88,7 +88,7 @@ namespace WeightTracker.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Failed to get weightsQuery: {ex.Message}");
+                _logger.LogError($"Failed to get weights: {ex.Message}");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Server is currently unable to handle your request");
             }
         }
@@ -127,7 +127,7 @@ namespace WeightTracker.Controllers
 
                 if (!add_success) 
                 {
-                    _logger.LogError("Failed to create user, database insert failure");
+                    _logger.LogError("Failed to create weight, database insert failure");
                     return StatusCode(StatusCodes.Status500InternalServerError, "Server is currently unable to handle your request");
                 }
 
@@ -143,7 +143,102 @@ namespace WeightTracker.Controllers
             }
         }
 
-        async private Task<FilteredResult<Weight>> GetFilteredWeights(int userId, GetWeightsQueryParameters queryParameters)
+        [Authorize]
+        [HttpPut("{weightId:int}")]
+        [Produces("application/json")]
+        async public Task<ActionResult> UpdateWeight(int weightId, WeightUpdate weightUpdateData)
+        {
+            try
+            {
+                _logger.LogDebug("Retrieving user using Claims Identity");
+                User? user = await _userRepo.GetByEmail(_authService.GetEmailFromClaims());
+                // In reality, if you've made it this far the user should exist
+                if (user == null)
+                    return NotFound();
+
+                _logger.LogInformation("Retrieving weight");
+                Weight? weightToUpdate = await _weightRepo.GetById(user.Id, weightId);
+                if (weightToUpdate == null)
+                    return NotFound();
+
+                _logger.LogInformation("Updating a weight");
+                // Validate user and date combination is unique and does not overlap with an existing entry that points to the same date
+                Weight? differentExistingWeight = await _weightRepo.GetWeightByUserIdAndDate(user.Id, weightUpdateData.Date);
+                if (differentExistingWeight != null && weightId != differentExistingWeight.Id)
+                    weightUpdateData.AddToErrors(nameof(WeightUpdate.Date), "A separate entry already exists for the date you are trying to update.");
+
+                bool dataIsValid = await weightUpdateData.IsValid(_weightRepo, user.Id);
+
+                if (!dataIsValid)
+                {
+                    _logger.LogDebug("Update a weight has invalid data");
+                    return BadRequest(
+                        new
+                        {
+                            errors = weightUpdateData.GetErrors(),
+                            status = HttpStatusCode.BadRequest,
+                            title = "One or more validation errors occurred."
+                        }
+                    );
+                }
+
+                weightToUpdate.UserWeight = weightUpdateData.UserWeight;
+                weightToUpdate.Date = weightUpdateData.Date;
+                weightToUpdate.Description = weightUpdateData.Description;
+                weightToUpdate.DateModified = DateTime.Now.ToUniversalTime();
+
+                bool updateSuccess = await _weightRepo.Update(weightToUpdate);
+                if (!updateSuccess)
+                {
+                    _logger.LogError("Failed to update weight, database update failure");
+                    return StatusCode(StatusCodes.Status500InternalServerError, "Server is currently unable to handle your request");
+                }
+
+                WeightOutput weightOutput = new(weightToUpdate);
+                return Ok(weightOutput);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to update weight: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Server is currently unable to handle your request");
+            }
+        }
+
+        [Authorize]
+        [HttpDelete("{weightId:int}")]
+        [Produces("application/json")]
+        async public Task<ActionResult> DeleteWeight(int weightId)
+        {
+            try
+            {
+                _logger.LogDebug("Retrieving user using Claims Identity");
+                User? user = await _userRepo.GetByEmail(_authService.GetEmailFromClaims());
+                // In reality, if you've made it this far the user should exist
+                if (user == null)
+                    return NotFound();
+
+                _logger.LogInformation("Retrieving weight");
+                Weight? weight = await _weightRepo.GetById(user.Id, weightId);
+                if (weight == null)
+                    return NotFound();
+
+                bool deletedSuccessfully = await _weightRepo.Delete(weight);
+                if (!deletedSuccessfully)
+                {
+                    _logger.LogError("Failed to delete weight, database delete failure");
+                    return StatusCode(StatusCodes.Status500InternalServerError, "Server is currently unable to handle your request");
+                }
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Failed to delete weight: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Server is currently unable to handle your request");
+            }
+        }
+
+            async private Task<FilteredResult<Weight>> GetFilteredWeights(int userId, GetWeightsQueryParameters queryParameters)
         {
             IQueryable<Weight> weightsQuery = _weightRepo.GetAllByUserId(userId);
 

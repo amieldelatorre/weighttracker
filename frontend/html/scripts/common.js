@@ -1,21 +1,33 @@
-function clearCredentialsAndRedirect() {
-  localStorage.removeItem("email");
-  localStorage.removeItem("password");
-  window.location.replace("login.html");
+function currentLocationIsLoginPage() {
+  const loginPageRegex = new RegExp("\/?login(?:\.html)?");
+  const pathName = window.location.pathname;
+
+  return loginPageRegex.test(pathName);
 }
 
-async function checkLoggedIn() {
+function clearCredentialsAndRedirectToLogin() {
+  localStorage.removeItem("email");
+  localStorage.removeItem("password");
+  
+  console.log(!currentLocationIsLoginPage())
+
+  if (!currentLocationIsLoginPage()) {
+    window.location.replace("/login");
+  }
+}
+
+async function isLoggedIn() {
   let email = localStorage.getItem("email");
   let password = localStorage.getItem("password");
   if (email === null || password === null) {
-    clearCredentialsAndRedirect();
+    return false;
   } else {
     let data = {
       "email": email,
       "password": password
     }
 
-    await fetch(URL=`${API_URL}/Auth/login`, {
+    await fetch(url=`${API_URL}/Auth/login`, {
       method: "POST",
       cors: "no-cors",
       headers: {
@@ -23,12 +35,12 @@ async function checkLoggedIn() {
       },
       body: JSON.stringify(data)
     }).then(response => {
-      if (response.ok) {} 
+      if (response.ok) { return true; } 
       else {
-        clearCredentialsAndRedirect();
+        return false;
       }
     }).catch(error => {
-      clearCredentialsAndRedirect();
+      return false;
     });
   }
 }
@@ -123,4 +135,8 @@ function getAuthHeaderValue() {
   let encodedBasicAuth = btoa(`${email}:${password}`);
 
   return `Basic ${encodedBasicAuth}`;
+}
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

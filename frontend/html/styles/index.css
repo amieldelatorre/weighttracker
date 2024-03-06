@@ -2,10 +2,24 @@
   margin-left: 30px;
 }
 
+.form-title {
+  margin-bottom: 10px;
+}
+
 .add-weight-form-fields {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-evenly;
+}
+
+.update-weight-form-container {
+  z-index: 88;
+}
+
+.update-weight-form-fields  {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;  
 }
 
 .add-weight-form-container {
@@ -18,17 +32,29 @@
   margin-top: 20px;
 }
 
-.add-weight-form input {
+.add-weight-form input, .update-weight-form input {
   width: 100px;
 }
 
-.add-weight-form button[type=submit] {
+button[type=submit] {
+  cursor: pointer;
+}
+
+.add-weight-form button[type=submit], .update-weight-form button[type=submit] {
   border-radius: 6px;
   display: block;
   padding: 3px;
   background-color: #20c8ff;
   width: 60px;
   max-height: 30px;
+}
+
+.update-weight-form .input-field p {
+  display: inline-block;
+}
+
+.input-field.show-time {
+  font-size: 0.8em;
 }
 
 .chart-container {
@@ -62,4 +88,13 @@ td, th {
 
 td {
   background: #0d74f55e;
+}
+
+.table-action:hover {
+  cursor: pointer;
+}
+
+.table-action {
+  max-width: 35px;
+  margin: 0px 3px 0px 3px;
 }
