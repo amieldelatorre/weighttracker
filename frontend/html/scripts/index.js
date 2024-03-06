@@ -265,12 +265,93 @@ async function deleteWeightAction(weightId) {
   }
 }
 
+async function updateWeight(weightId, userWeight, description, date) {
+  const updateUrl = `${API_URL}/Weight/${weightId}`;
+  let data = {
+    "userWeight": userWeight,
+    "date": date,
+    "description": description
+  };
+
+  try {
+    let response = await fetch(url=updateUrl, {
+      method: "PUT",
+      cors: "no-cors",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": getAuthHeaderValue()
+      },
+      body: JSON.stringify(data)
+    });
+
+    closeEditWeightForm();
+    
+    if (response.ok) {
+      clearNotification();
+      let notification = {
+        type: "success",
+        title: "Weight updated successfully!",
+        messages: [
+          "Success !",
+          "Refreshing in 1.5s"
+        ]
+      }; 
+      addGenericNotification(notification);
+      await sleep(1500);
+      window.location.reload();
+    } else if (response.status === 404) {
+      clearNotification();
+      let notification = {
+        type: "error",
+        title: "The entry cannot be found and may have already been deleted",
+        messages: [
+          "Please refresh the page."
+        ]
+      };
+      addGenericNotification(notification);
+    } else if (response.status === 401) {
+      clearCredentialsAndRedirectToLogin();
+    } else if (response.status === 400) {
+      clearNotification();
+      let errorJSONPromise = response.json().then(err => err["errors"]);
+      setValidationErrorModal(errorJSONPromise);
+    } else {
+      clearNotification();
+
+      let notification = {
+        type: "error",
+        title: "Unable to reach server 😞",
+        messages: [
+          "Please try again later and if problem persists, please contact the administrator."
+        ]
+      };
+      addGenericNotification(notification);
+    }
+  } 
+  catch (error){
+    clearNotification();
+
+    let notification = {
+      type: "error",
+      title: "Unable to reach server 😞",
+      messages: [
+        "Please try again later and if problem persists, please contact the administrator."
+      ]
+    };
+    addGenericNotification(notification);
+  }
+}
+
 function handleUpdateWeightFormSubmit() {
   let updateWeightForm = document.getElementById("update-weight-form");
   updateWeightForm.addEventListener("submit", async (submitEvent) => {
     submitEvent.preventDefault();
     let weightId = document.getElementById("update-weightId").value;
-    console.log(weightId);
+    let userWeight = document.getElementById("weight-update").value;
+    let description = document.getElementById("description-update").value;
+    let date = document.getElementById("dateOfWeight-update").value;
+
+    updateWeight(weightId, userWeight, description, date);
   });
 }
 
@@ -286,7 +367,6 @@ function closeEditWeightForm() {
 }
 
 async function showEditForm(weightId) {
-  console.log(weightId);
   let editFormModal = document.getElementById("edit-weight-form-modal");
   editFormModal.hidden = false;
 
