@@ -7,7 +7,7 @@ docker compose -f ./compose-local.yml down
 ```
 
 ## Improvements
-- [ ] Add a not found html file
+- [x] Add a not found html file
 - [ ] Suppress Entity Framework Logs query logging
 - [ ] Use Terraform to deploy (not going to be within pipeline to keep deployment hidden)
 - [ ] Separate the backend implementation to a Layered Architecture. With the following a Application Presentation Layer, Application / Business Access Layer, and a Data Access Layer.
