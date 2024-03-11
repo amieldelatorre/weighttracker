@@ -9,7 +9,7 @@ jobs:
   build-and-test:
     uses: ./.github/workflows/build.yml
 
-  push:
+  docker-push:
     needs: [build-and-test]
     runs-on: ubuntu-latest
 
@@ -44,4 +44,20 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: amieldelatorre/weighttracker-backend:${{  github.ref_name }},amieldelatorre/weighttracker-backend:latest
+
+  create-release:
+    needs: [build-and-test, docker-push]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Update release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: gh release create "$TAG" --title="$TAG" --notes-file ./CHANGELOG.md
     
