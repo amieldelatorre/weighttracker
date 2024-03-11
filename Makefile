@@ -1,7 +1,9 @@
+.ONESHELL:
+
 BACKEND_REPOSITORY := amieldelatorre/weighttracker-backend
 FRONTEND_REPOSITORY := amieldelatorre/weighttracker-frontend
 
-Frontend
+# Frontend
 build-frontend:
 				echo "Building frontend with 'latest' tag..."
 				docker build -t "${FRONTEND_REPOSITORY}:latest" .
@@ -25,3 +27,10 @@ build-push-backend: build-backend push-backend
 
 # All
 build-push-all: build-push-backend # build-push-frontend
+
+
+# Terraform
+tf-apply:
+				cd ./infra
+				rm -rf .terraform .terraform.lock.hcl
+				terraform init -backend-config=backend.conf
