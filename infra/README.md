@@ -15,6 +15,7 @@ encrypt        = false
 # Environment variables
 export TF_VAR_region="<region>"
 export TF_VAR_aws_profile="<profile>"
+export TF_VAR_vpc_cidr_block= "<cidr-block>"
 ```
 
 ```bash

@@ -4,6 +4,7 @@
 
 ### Added
 - Create a release on tag with github actions
+- Create AWS VPC and networking configuration with Terraform
 
 ### Fixed
 N/A
