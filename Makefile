@@ -32,5 +32,11 @@ build-push-all: build-push-backend # build-push-frontend
 # Terraform
 tf-apply:
 				cd ./infra
+				. ./.env
 				rm -rf .terraform .terraform.lock.hcl
 				terraform init -backend-config=backend.conf
+				terraform apply
+
+				site_bucket=$$(terraform output -json | jq -r '.static_site_s3_bucket_name.value')
+				aws s3 sync ../frontend/html "s3://$${site_bucket}" --delete
+				# create cloudfront cache invalidation

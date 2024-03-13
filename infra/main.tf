@@ -9,3 +9,10 @@ module "network" {
     "c" = false
   }
 }
+
+module "static_site" {
+  source = "./modules/website"
+
+  project_name                = "weighttracker"
+  static_site_file_directory  = var.static_site_file_directory
+}
