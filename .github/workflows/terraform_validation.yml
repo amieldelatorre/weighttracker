@@ -1,0 +1,44 @@
+name: Validate Terraform Configuration and Modules
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  validate-terraform:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.7.4"
+
+      - name: Validate Root Module
+        working-directory: "./infra"
+        run: |
+          terraform init -backend=false
+          terraform validate
+      
+      - name: Validate Network Module
+        working-directory: "./infra/modules/network"
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+      - name: Validate Website Module
+        working-directory: "./infra/modules/website"
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+      # Uncomment when done
+      # - name: Validate API Server Module
+      #   working-directory: "./infra/modules/api-server"
+      #   run: |
+      #     terraform init -backend=false
+      #     terraform validate
