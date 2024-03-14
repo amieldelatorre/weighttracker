@@ -43,7 +43,7 @@ function handleSignupFormSubmit() {
     })
     .then(response => {
       if (response.ok) {
-        window.location.replace(`/login?signup=success`);
+        window.location.replace(`/login.html?signup=success`);
       }
       else {
         if (response.status === 400) {

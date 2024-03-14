@@ -12,7 +12,7 @@ function clearCredentialsAndRedirectToLogin() {
   console.log(!currentLocationIsLoginPage())
 
   if (!currentLocationIsLoginPage()) {
-    window.location.replace("/login");
+    window.location.replace("/login.html");
   }
 }
 

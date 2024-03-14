@@ -45,7 +45,7 @@ data "aws_iam_policy_document" "site_bucket" {
     condition {
       test      = "StringEquals"
       variable  = "AWS:SourceArn"
-      values    = [ aws_cloudfront_distribution.something.arn ]
+      values    = [ aws_cloudfront_distribution.site.arn ]
     }
   }
 }
@@ -55,25 +55,14 @@ resource "aws_s3_bucket_policy" "site_bucket" {
   policy = data.aws_iam_policy_document.site_bucket.json
 }
 
-# resource "aws_s3_object" "static_site_file" {
-#   for_each = fileset(var.static_site_file_directory, "**")
-  
-#   bucket        = aws_s3_bucket.site_bucket.id
-#   key           = each.value
-#   source        = "${var.static_site_file_directory}${each.value}"
-#   content_type  = "text/html"
-  
-#   etag = filemd5("${var.static_site_file_directory}${each.value}")
-# }
-
 resource "aws_s3_bucket_website_configuration" "site_bucket" {
   bucket = aws_s3_bucket.site_bucket.id
 
   index_document {
-    suffix = "index"
+    suffix = "index.html"
   }
 
   error_document {
-    key = "404"
+    key = "404.html"
   }
 }

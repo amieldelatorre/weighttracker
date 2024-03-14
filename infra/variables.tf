@@ -31,3 +31,8 @@ variable "static_site_file_directory" {
     error_message = "The path must end with a /"
   }
 }
+
+variable "hosted_zone_id" {
+  description = "Hosted Zone Id for the hosted zone to use for DNS records"
+  type        = string
+}

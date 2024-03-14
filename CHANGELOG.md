@@ -6,12 +6,13 @@
 - Create a release on tag with github actions
 - Create AWS VPC and networking configuration with Terraform
 - Add S3 bucket for Static site
+- Add CloudFront
 
 ### Fixed
 N/A
 
 ### Changed
-N/A
+- Update html links to use ".html" suffix as that's how CloudFront serves the files
 
 ### Removed
 N/A
