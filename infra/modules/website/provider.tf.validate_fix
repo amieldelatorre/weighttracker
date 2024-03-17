@@ -1,0 +1,8 @@
+# Required when validating the module
+# Terraform doesn't like it when validating child module that relies on a provider from it's parent module
+# https://github.com/hashicorp/terraform/issues/28490
+
+provider "aws" {
+  region = "us-east-1"
+  alias = "usea1"
+}

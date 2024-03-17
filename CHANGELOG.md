@@ -7,6 +7,7 @@
 - Create AWS VPC and networking configuration with Terraform
 - Add S3 bucket for Static site
 - Add CloudFront
+- Add validation of terraform modules
 
 ### Fixed
 N/A

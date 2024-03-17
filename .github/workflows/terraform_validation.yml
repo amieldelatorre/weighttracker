@@ -34,6 +34,7 @@ jobs:
         working-directory: "./infra/modules/website"
         run: |
           terraform init -backend=false
+          mv provider.tf.validate_fix provider.tf
           terraform validate
 
       # Uncomment when done
